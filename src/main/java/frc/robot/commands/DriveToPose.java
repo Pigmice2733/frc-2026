@@ -39,7 +39,9 @@ public class DriveToPose extends Command {
     public void execute() {
         currentPose = drivetrain.getPose();
         if (endPose.getX() > currentPose.getX()) {
-            drivetrain.driveRobot(-0.75, 0, 0);
+            drivetrain.driveRobot(0.75, 0, 0);
+        } else if (endPose.getY() > currentPose.getY()) {
+            drivetrain.driveRobot(0, 0.75, 0);
         } else {
             drivetrain.driveRobot(0, 0, 0);
         }
