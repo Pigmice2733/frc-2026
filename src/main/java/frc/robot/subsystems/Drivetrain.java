@@ -224,20 +224,20 @@ public class Drivetrain extends SubsystemBase
    *
    * @return A {@link Command} which will run the alignment.
    */
-  // public Command aimAtTarget(Cameras camera)
+  // public Command aimAtTarget(Vision vision)
   // {
 
   //   return run(() -> {
-  //     Optional<PhotonPipelineResult> resultO = camera.getBestResult();
+  //     Optional<PhotonPipelineResult> resultO = vision.getTargetPose();
   //     if (resultO.isPresent())
   //     {
   //       var result = resultO.get();
-  //       if (result.hasTargets())
+  //       if (vision.hasTarget())
   //       {
   //         drive(getTargetSpeeds(0,
   //                               0,
-  //                               Rotation2d.fromDegrees(result.getBestTarget()
-  //                                                            .getYaw()))); // Not sure if this will work, more math may be required.
+  //                               Rotation2d.fromDegrees(vision.getTargetPose()
+  //                                                            .getRotation()))); // Not sure if this will work, more math may be required.
   //       }
   //     }
   //   });

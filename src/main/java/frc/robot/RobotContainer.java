@@ -63,6 +63,7 @@ public class RobotContainer {
         autoChooser.addOption("Drive Forward",
                 new DriveToPose(drivetrain, new Transform2d(6.5, 0, new Rotation2d(0))));
         autoChooser.addOption("Drive Right", new DriveToPose(drivetrain, new Transform2d(0, 2, new Rotation2d(0))));
+        autoChooser.addOption("Drive Diagonal", drivetrain.driveToPose(new Pose2d(2, 3, new Rotation2d(Math.toRadians(90)))));
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
