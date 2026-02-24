@@ -3,6 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DrivetrainConfig;
 import frc.robot.subsystems.Drivetrain;
@@ -24,7 +25,7 @@ public class DriveToPose extends Command {
 
     @Override
     public void initialize() {
-        drivetrain.reset();
+        drivetrain.resetOdometry(new Pose2d());
         currentPose = drivetrain.getPose();
         endPose = currentPose.transformBy(path);
 
@@ -39,17 +40,17 @@ public class DriveToPose extends Command {
     public void execute() {
         currentPose = drivetrain.getPose();
         if (endPose.getX() > currentPose.getX()) {
-            drivetrain.driveField(0.75, 0, 0);
+            drivetrain.driveFieldOriented(new ChassisSpeeds(0.75, 0, 0));
         } else if (endPose.getY() > currentPose.getY()) {
-            drivetrain.driveField(0, 0.75, 0);
+            drivetrain.driveFieldOriented(new ChassisSpeeds(0, 0.75, 0));
         } else {
-            drivetrain.driveField(0, 0, 0);
+            drivetrain.driveFieldOriented(new ChassisSpeeds(0, 0, 0));
         }
     }
 
     @Override
     public void end(boolean interrupted) {
-        drivetrain.driveField(0, 0, 0);
+        drivetrain.driveFieldOriented(new ChassisSpeeds(0, 0, 0));
     }
 
     @Override

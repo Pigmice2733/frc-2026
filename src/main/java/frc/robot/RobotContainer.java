@@ -33,6 +33,7 @@ public class RobotContainer {
         driver = new CommandXboxController(0);
         operator = new CommandXboxController(1);
         controls = new Controls(driver, operator);
+
         drivetrain = new Drivetrain();
 
         robotOriented = false;
@@ -54,7 +55,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        driver.a().onTrue(drivetrain.reset());
+        driver.a().onTrue(new InstantCommand(() -> drivetrain.resetOdometry(new Pose2d())));
     }
 
     private void buildAutoChooser() {
