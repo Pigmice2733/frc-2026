@@ -59,6 +59,7 @@ public class RobotContainer {
 
     private void configureBindings() {
         driver.a().onTrue(drivetrain.resetOdometryAlliance());
+        driver.x().onTrue(drivetrain.rotateToHub());
     }
 
     private void buildAutoChooser() {

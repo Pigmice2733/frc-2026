@@ -4,6 +4,10 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meters;
+
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -21,17 +25,29 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public final class Constants {
 
-    public static final double AXIS_THRESHOLD = 0.1d;
+    public static final double AXIS_THRESHOLD = 0.1;
 
     public static final class DrivetrainConfig {
-        public static final double MAX_DRIVE_SPEED = 6.25d; // m/s
-        public static final double MAX_TURN_SPEED = 2.0d * Math.PI; // rad/s
+        public static final double MAX_DRIVE_SPEED = 6.25; // m/s
+        public static final double MAX_TURN_SPEED = 2.0 * Math.PI; // rad/s
 
         public static final PIDController DRIVE_PID = new PIDController(3.5, 0, 1.3);
         public static final double DRIVE_P = 2.9;
 
         public static final PIDController TURN_PID = new PIDController(3.5, 0, 0.1);
         public static final double TURN_P = 3.5;
+    }
+
+    public static final class FieldConstants {
+        public static final AprilTagFieldLayout APRIL_TAG_LAYOUT = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+
+        public static final double HUB_WIDTH = 1.1938; // meters
+
+        public static final double BLUE_HUB_CENTER_X = APRIL_TAG_LAYOUT.getTagPose(26).get().getX() + HUB_WIDTH / 2;
+        public static final double BLUE_HUB_CENTER_Y = APRIL_TAG_LAYOUT.getTagPose(21).get().getY() + HUB_WIDTH / 2;
+
+        public static final double RED_HUB_CENTER_X = APRIL_TAG_LAYOUT.getTagPose(10).get().getX() + HUB_WIDTH / 2;
+        public static final double RED_HUB_CENTER_Y = APRIL_TAG_LAYOUT.getTagPose(5).get().getY() + HUB_WIDTH / 2;
     }
 
     public static void sendNumberToElastic(String name, double num, double places) {

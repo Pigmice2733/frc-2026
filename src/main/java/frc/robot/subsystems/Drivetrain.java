@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meter;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -41,13 +40,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
 import frc.robot.Constants.DrivetrainConfig;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.LimelightHelpers;
-import frc.robot.LimelightHelpers.PoseEstimate;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -87,6 +84,8 @@ public class Drivetrain extends SubsystemBase {
    * Whether the current alliance station is blue or not.
    */
   private boolean blueAlliance;
+
+  private double hubAngle;
 
   /**
    * Initialize the drivetrain.
@@ -183,6 +182,20 @@ public class Drivetrain extends SubsystemBase {
     Constants.sendNumberToElastic("Drivetrain Linear Speed",
         Math.hypot(swerve.getFieldVelocity().vxMetersPerSecond, swerve.getFieldVelocity().vyMetersPerSecond), 3);
     Constants.sendNumberToElastic("Drivetrain Angular Speed", swerve.getFieldVelocity().omegaRadiansPerSecond, 3);
+
+    if (blueAlliance) {
+      Constants.sendNumberToElastic("Hub X", FieldConstants.BLUE_HUB_CENTER_X, 3);
+      Constants.sendNumberToElastic("Hub Y", FieldConstants.BLUE_HUB_CENTER_Y, 3);
+      hubAngle = Math.atan((robotPose.getY() - FieldConstants.BLUE_HUB_CENTER_Y)
+          / (robotPose.getX() - FieldConstants.BLUE_HUB_CENTER_X));
+    } else {
+      Constants.sendNumberToElastic("Hub X", FieldConstants.RED_HUB_CENTER_X, 3);
+      Constants.sendNumberToElastic("Hub Y", FieldConstants.RED_HUB_CENTER_Y, 3);
+      hubAngle = Math.atan(
+          (robotPose.getY() - FieldConstants.RED_HUB_CENTER_Y) / (robotPose.getX() - FieldConstants.RED_HUB_CENTER_X));
+    }
+
+    Constants.sendNumberToElastic("Hub Angle", Math.toDegrees(hubAngle), 3);
 
     pidConstants = new PIDConstants(SmartDashboard.getNumber("Drivetrain P", 0),
         SmartDashboard.getNumber("Drivetrain I", 0), SmartDashboard.getNumber("Drivetrain D", 0));
@@ -310,12 +323,19 @@ public class Drivetrain extends SubsystemBase {
         swerve.getMaximumChassisVelocity(), 4.0,
         swerve.getMaximumChassisAngularVelocity(), Units.degreesToRadians(720));
 
+    System.out.println("Pose: " + pose);
+
     // Since AutoBuilder is configured, we can use it to build pathfinding commands
     return AutoBuilder.pathfindToPose(
         pose,
         constraints,
         edu.wpi.first.units.Units.MetersPerSecond.of(0) // Goal end velocity in meters/sec
     );
+  }
+
+  public Command rotateToHub() {
+    return new InstantCommand(
+        () -> driveToPose(new Pose2d(robotPose.getX(), robotPose.getY(), Rotation2d.fromDegrees(180 + hubAngle))).schedule());
   }
 
   /**
