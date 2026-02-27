@@ -34,7 +34,7 @@ public class Vision extends SubsystemBase {
 
     targetArray = NetworkTableInstance.getDefault().getTable("limelight").getEntry("targetpose_robotspace")
         .getDoubleArray(targetArray);
-    targetPose = new Pose2d(targetArray[2], targetArray[0], new Rotation2d(Units.degreesToRadians(targetArray[4])));
+    targetPose = new Pose2d(targetArray[0], targetArray[1], new Rotation2d(Units.degreesToRadians(targetArray[4])));
 
     targetID = (int) NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(-1);
 

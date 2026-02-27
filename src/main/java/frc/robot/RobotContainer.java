@@ -7,6 +7,7 @@ package frc.robot;
 import frc.robot.commands.DriveJoysticks;
 import frc.robot.commands.DriveToPose;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.Vision;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -20,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 @SuppressWarnings("unused")
 public class RobotContainer {
     private final Drivetrain drivetrain;
+    private final Vision vision;
 
     private final CommandXboxController driver;
     private final CommandXboxController operator;
@@ -35,6 +37,7 @@ public class RobotContainer {
         controls = new Controls(driver, operator);
 
         drivetrain = new Drivetrain();
+        vision = new Vision();
 
         robotOriented = false;
 
@@ -55,7 +58,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        driver.a().onTrue(new InstantCommand(() -> drivetrain.resetOdometry(new Pose2d())));
+        driver.a().onTrue(drivetrain.resetOdometryAlliance());
     }
 
     private void buildAutoChooser() {
