@@ -27,6 +27,10 @@ public final class Constants {
 
     public static final double AXIS_THRESHOLD = 0.1;
 
+    public static final class CanConfig {
+        public static final int SHOOTER_ID = 20;
+    }
+
     public static final class DrivetrainConfig {
         public static final double MAX_DRIVE_SPEED = 6.25; // m/s
         public static final double MAX_TURN_SPEED = 2.0 * Math.PI; // rad/s

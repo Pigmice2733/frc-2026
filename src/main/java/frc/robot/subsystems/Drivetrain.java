@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meter;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -334,8 +335,9 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Command rotateToHub() {
+    Pose2d targetPose = new Pose2d(robotPose.getX(), robotPose.getY(), new Rotation2d(Degrees.of(180 + hubAngle)));
     return new InstantCommand(
-        () -> driveToPose(new Pose2d(robotPose.getX(), robotPose.getY(), Rotation2d.fromDegrees(180 + hubAngle))).schedule());
+        () -> driveToPose(targetPose).schedule());
   }
 
   /**
