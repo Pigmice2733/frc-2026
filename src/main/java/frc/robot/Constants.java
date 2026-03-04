@@ -29,6 +29,7 @@ public final class Constants {
 
     public static final class CanConfig {
         public static final int SHOOTER_ID = 20;
+        public static final int INTAKE_ID = 21;
         public static final int INDEXER_ID_A = 22;
         public static final int INDEXER_ID_B = 23;
     }

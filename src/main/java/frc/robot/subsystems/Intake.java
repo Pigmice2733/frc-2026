@@ -11,7 +11,7 @@ public class Intake extends SubsystemBase {
     private SparkMax motor;
 
     public Intake() {
-        motor = new SparkMax(CanConfig.INDEXER_ID_A, MotorType.kBrushless);
+        motor = new SparkMax(CanConfig.INTAKE_ID, MotorType.kBrushless);
     }
 
     public void stop() {
