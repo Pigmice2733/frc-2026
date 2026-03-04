@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -17,7 +18,7 @@ public class Shooter extends SubsystemBase {
 
     private TalonFX motor;
     private TalonFXConfiguration config;
-    private double targetSpeed;
+    private double targetSpeed, shootingSpeed;
     private Slot0Configs slot0Configs;
     private VelocityVoltage velocityVoltage;
 
@@ -34,6 +35,8 @@ public class Shooter extends SubsystemBase {
         slot0Configs.kD = 0.01;
         motor.getConfigurator().apply(config);
         motor.getConfigurator().apply(slot0Configs);
+
+        shootingSpeed = 3000;
     }
 
     @Override
@@ -43,8 +46,19 @@ public class Shooter extends SubsystemBase {
     }
 
     public void updateEntries() {
+        Constants.sendNumberToElastic("Shooter Shooting Speed", shootingSpeed, 3);
         Constants.sendNumberToElastic("Shooter Target Speed", targetSpeed, 3);
         Constants.sendNumberToElastic("Shooter RPS", motor.getVelocity().getValueAsDouble(), 2);
+        
+        boolean upToSpeed;
+
+        if (SmartDashboard.getNumber("Shooter RPS", 0) >= shootingSpeed) { 
+            upToSpeed = true;
+        } else {
+            upToSpeed = false;
+        }
+
+        SmartDashboard.putBoolean("Up To Speed?", upToSpeed);
     }
 
     public void setSpeed() {
