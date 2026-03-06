@@ -45,6 +45,14 @@ public final class Constants {
         public static final double TURN_P = 3.5;
     }
 
+    public static final class ShooterConfig {
+        public static final double SHOOTING_SPEED = 50;
+    }
+
+    public static final class IntakeConfig {
+        public static final double INTAKE_SPEED = 0.4;
+    }
+
     public static final class FieldConstants {
         public static final AprilTagFieldLayout APRIL_TAG_LAYOUT = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 

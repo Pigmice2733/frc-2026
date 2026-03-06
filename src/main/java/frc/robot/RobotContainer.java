@@ -7,6 +7,8 @@ package frc.robot;
 import frc.robot.commands.DriveJoysticks;
 import frc.robot.commands.DriveToPose;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.Indexer;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Vision;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -24,6 +26,8 @@ public class RobotContainer {
     private final Drivetrain drivetrain;
     private final Vision vision;
     private final Shooter shooter;
+    private final Intake intake;
+    private final Indexer indexer;
 
     private final CommandXboxController driver;
     private final CommandXboxController operator;
@@ -41,6 +45,8 @@ public class RobotContainer {
         drivetrain = new Drivetrain();
         vision = new Vision();
         shooter = new Shooter();
+        intake = new Intake();
+        indexer = new Indexer();
 
         robotOriented = false;
 
@@ -63,10 +69,19 @@ public class RobotContainer {
     private void configureBindings() {
         // DRIVER
         driver.a().onTrue(drivetrain.resetOdometryAlliance());
+        
         driver.x().whileTrue(drivetrain.rotateToHub());
         
         // OPERATOR
-        operator.rightTrigger().whileTrue(new InstantCommand(() -> shooter.setTargetSpeed(30)));
+        operator.leftBumper().onTrue(new InstantCommand(() -> shooter.setTargetSpeed(shooter.shootingSpeed)));
+        operator.leftTrigger().onTrue(new InstantCommand(() -> shooter.stopMotor()));
+
+        operator.rightBumper().whileTrue(new InstantCommand(() -> indexer.setTargetSpeed(0.2)));
+        operator.rightBumper().whileFalse(new InstantCommand(() -> indexer.setTargetSpeed(0)));
+
+        operator.y().whileTrue(new InstantCommand(() -> intake.toggle()));
+        operator.b().onTrue(new InstantCommand(() -> intake.intake()));
+        operator.a().onTrue(new InstantCommand(() -> intake.outtake()));
     }
 
     private void buildAutoChooser() {

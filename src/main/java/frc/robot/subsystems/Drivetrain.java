@@ -334,6 +334,9 @@ public class Drivetrain extends SubsystemBase {
     );
   }
 
+  /**
+   * Rotates the robot such that the front is facing the hub
+   */
   public Command rotateToHub() {
     Pose2d targetPose = new Pose2d(robotPose.getX(), robotPose.getY(), new Rotation2d(Degrees.of(180 + hubAngle)));
     return new InstantCommand(

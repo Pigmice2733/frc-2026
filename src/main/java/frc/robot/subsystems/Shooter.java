@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -13,12 +14,14 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.CanConfig;
+import frc.robot.Constants.ShooterConfig;
 
 public class Shooter extends SubsystemBase {
 
     private TalonFX motor;
     private TalonFXConfiguration config;
-    private double targetSpeed, shootingSpeed;
+    private double targetSpeed;
+    public double shootingSpeed = ShooterConfig.SHOOTING_SPEED;
     private Slot0Configs slot0Configs;
     private VelocityVoltage velocityVoltage;
 
@@ -35,8 +38,6 @@ public class Shooter extends SubsystemBase {
         slot0Configs.kD = 0.01;
         motor.getConfigurator().apply(config);
         motor.getConfigurator().apply(slot0Configs);
-
-        shootingSpeed = 3000;
     }
 
     @Override
@@ -52,7 +53,7 @@ public class Shooter extends SubsystemBase {
         
         boolean upToSpeed;
 
-        if (SmartDashboard.getNumber("Shooter RPS", 0) >= shootingSpeed) { 
+        if (Math.abs(SmartDashboard.getNumber("Shooter RPS", 0) - shootingSpeed) <= 0.5) { 
             upToSpeed = true;
         } else {
             upToSpeed = false;
@@ -65,14 +66,14 @@ public class Shooter extends SubsystemBase {
         motor.set(targetSpeed);
     }
 
-    public void setTargetSpeed(double speed) {
-        targetSpeed = speed;
+    public void setTargetSpeed(double rps) {
+        targetSpeed = rps;
         motor.setControl(velocityVoltage.withVelocity(targetSpeed));
     }
     
     public void stopMotor() {
         targetSpeed = 0;
-        motor.setControl(velocityVoltage.withVelocity(0));
+        motor.setControl(new NeutralOut());
     }
 
     public Command incrementMotor(double speed) {
