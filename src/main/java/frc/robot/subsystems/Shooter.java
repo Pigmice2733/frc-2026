@@ -21,7 +21,6 @@ public class Shooter extends SubsystemBase {
     private TalonFX motor;
     private TalonFXConfiguration config;
     private double targetSpeed;
-    public double shootingSpeed = ShooterConfig.SHOOTING_SPEED;
     private Slot0Configs slot0Configs;
     private VelocityVoltage velocityVoltage;
 
@@ -47,13 +46,13 @@ public class Shooter extends SubsystemBase {
     }
 
     public void updateEntries() {
-        Constants.sendNumberToElastic("Shooter Shooting Speed", shootingSpeed, 3);
+        Constants.sendNumberToElastic("Shooter Shooting Speed", ShooterConfig.SHOOTING_SPEED, 2);
         Constants.sendNumberToElastic("Shooter Target Speed", targetSpeed, 3);
         Constants.sendNumberToElastic("Shooter RPS", motor.getVelocity().getValueAsDouble(), 2);
         
         boolean upToSpeed;
 
-        if (Math.abs(SmartDashboard.getNumber("Shooter RPS", 0) - shootingSpeed) <= 0.5) { 
+        if (Math.abs(SmartDashboard.getNumber("Shooter RPS", 0) - ShooterConfig.SHOOTING_SPEED) <= 0.5) { 
             upToSpeed = true;
         } else {
             upToSpeed = false;

@@ -46,11 +46,11 @@ public final class Constants {
     }
 
     public static final class ShooterConfig {
-        public static final double SHOOTING_SPEED = 50;
+        public static final double SHOOTING_SPEED = -100; // 5'2" at 75
     }
 
     public static final class IntakeConfig {
-        public static final double INTAKE_SPEED = 0.4;
+        public static final double INTAKE_SPEED = 1;
     }
 
     public static final class FieldConstants {

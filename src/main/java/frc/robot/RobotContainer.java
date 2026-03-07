@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.robot.Constants.ShooterConfig;
 import frc.robot.commands.DriveJoysticks;
 import frc.robot.commands.DriveToPose;
 import frc.robot.subsystems.Drivetrain;
@@ -73,11 +74,13 @@ public class RobotContainer {
         // driver.x().whileTrue(drivetrain.rotateToHub());
         
         // OPERATOR
-        operator.leftBumper().onTrue(new InstantCommand(() -> shooter.setTargetSpeed(shooter.shootingSpeed)));
+        operator.leftBumper().onTrue(new InstantCommand(() -> shooter.setTargetSpeed(ShooterConfig.SHOOTING_SPEED)));
         operator.leftTrigger().onTrue(new InstantCommand(() -> shooter.stopMotor()));
 
-        operator.rightBumper().whileTrue(new InstantCommand(() -> indexer.setTargetSpeed(0.2)));
+        operator.rightBumper().whileTrue(new InstantCommand(() -> indexer.setTargetSpeed(-0.6)));
         operator.rightBumper().whileFalse(new InstantCommand(() -> indexer.setTargetSpeed(0)));
+        operator.rightTrigger().whileTrue(new InstantCommand(() -> indexer.setTargetSpeed(0.6)));
+        operator.rightTrigger().whileFalse(new InstantCommand(() -> indexer.setTargetSpeed(0)));
 
         operator.y().whileTrue(new InstantCommand(() -> intake.toggle()));
         operator.b().onTrue(new InstantCommand(() -> intake.intake()));
