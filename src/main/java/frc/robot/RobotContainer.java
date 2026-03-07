@@ -71,15 +71,15 @@ public class RobotContainer {
         // DRIVER
         driver.a().onTrue(new InstantCommand(() -> drivetrain.zeroGyroWithAlliance()));
 
-        driver.x().whileTrue(drivetrain.rotateToHub());
+        driver.x().onTrue(drivetrain.rotateToHub());
         
         // OPERATOR
         operator.leftBumper().onTrue(new InstantCommand(() -> shooter.setTargetSpeed(ShooterConfig.SHOOTING_SPEED)));
         operator.leftTrigger().onTrue(new InstantCommand(() -> shooter.stopMotor()));
 
-        operator.rightBumper().whileTrue(new InstantCommand(() -> indexer.setTargetSpeed(-0.6)));
+        operator.rightBumper().whileTrue(new InstantCommand(() -> indexer.setTargetSpeed(-0.6))); // forward
         operator.rightBumper().whileFalse(new InstantCommand(() -> indexer.setTargetSpeed(0)));
-        operator.rightTrigger().whileTrue(new InstantCommand(() -> indexer.setTargetSpeed(0.6)));
+        operator.rightTrigger().whileTrue(new InstantCommand(() -> indexer.setTargetSpeed(0.6))); // backward
         operator.rightTrigger().whileFalse(new InstantCommand(() -> indexer.setTargetSpeed(0)));
 
         operator.y().whileTrue(new InstantCommand(() -> intake.toggle()));
@@ -89,10 +89,11 @@ public class RobotContainer {
 
     private void buildAutoChooser() {
         autoChooser.setDefaultOption("None", Commands.none());
-        autoChooser.addOption("Drive Forward",
-                new DriveToPose(drivetrain, new Transform2d(6.5, 0, new Rotation2d(0))));
-        autoChooser.addOption("Drive Right", new DriveToPose(drivetrain, new Transform2d(0, 2, new Rotation2d(0))));
-        autoChooser.addOption("Drive Diagonal", drivetrain.driveToPose(new Pose2d(2, 3, new Rotation2d(Math.toRadians(90)))));
+        autoChooser.addOption("Rotate and Score", getAutonomousCommand());
+        // autoChooser.addOption("Drive Forward",
+        //         new DriveToPose(drivetrain, new Transform2d(6.5, 0, new Rotation2d(0))));
+        // autoChooser.addOption("Drive Right", new DriveToPose(drivetrain, new Transform2d(0, 2, new Rotation2d(0))));
+        // autoChooser.addOption("Drive Diagonal", drivetrain.driveToPose(new Pose2d(2, 3, new Rotation2d(Math.toRadians(90)))));
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
