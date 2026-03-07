@@ -3,8 +3,8 @@ package frc.robot.subsystems;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import frc.robot.Constants;
 import frc.robot.Constants.CanConfig;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Indexer extends SubsystemBase {
@@ -22,13 +22,15 @@ public class Indexer extends SubsystemBase {
         setToSpeed();
     }
 
-    public void setToSpeed() {
-        boolean upToSpeed = SmartDashboard.getBoolean("Up To Speed?", false);
+    public void updateEntries() {
+        Constants.sendNumberToElastic("Indexer Motor 1 RPM", motorA.getEncoder().getVelocity(), 2);
+        Constants.sendNumberToElastic("Indexer Motor 2 RPM", motorB.getEncoder().getVelocity(), 2);
+        Constants.sendNumberToElastic("Indexer Target Speed", targetSpeed, 3);
+    }
 
-        // if (upToSpeed) {
-            motorA.set(targetSpeed);
-            motorB.set(targetSpeed);
-        // }
+    public void setToSpeed() {
+        motorA.set(targetSpeed);
+        motorB.set(targetSpeed);
     }
 
     public void stop() {

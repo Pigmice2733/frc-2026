@@ -23,7 +23,8 @@ public class Intake extends SubsystemBase {
     }
 
     private void updateEntries() {
-        Constants.sendNumberToElastic("Intake Speed", motor.get(), 2);
+        Constants.sendNumberToElastic("Intake RPM", motor.getEncoder().getVelocity(), 2);
+        Constants.sendNumberToElastic("Intake Target Speed", targetSpeed, 3);
     }
 
     private void setSpeed() {

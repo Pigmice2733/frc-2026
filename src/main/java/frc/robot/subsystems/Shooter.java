@@ -49,16 +49,6 @@ public class Shooter extends SubsystemBase {
         Constants.sendNumberToElastic("Shooter Shooting Speed", ShooterConfig.SHOOTING_SPEED, 2);
         Constants.sendNumberToElastic("Shooter Target Speed", targetSpeed, 3);
         Constants.sendNumberToElastic("Shooter RPS", motor.getVelocity().getValueAsDouble(), 2);
-        
-        boolean upToSpeed;
-
-        if (Math.abs(SmartDashboard.getNumber("Shooter RPS", 0) - ShooterConfig.SHOOTING_SPEED) <= 0.5) { 
-            upToSpeed = true;
-        } else {
-            upToSpeed = false;
-        }
-
-        SmartDashboard.putBoolean("Up To Speed?", upToSpeed);
     }
 
     public void setSpeed() {
