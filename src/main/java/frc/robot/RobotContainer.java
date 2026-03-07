@@ -70,7 +70,7 @@ public class RobotContainer {
         // DRIVER
         driver.a().onTrue(new InstantCommand(() -> drivetrain.zeroGyroWithAlliance()));
 
-        // driver.x().whileTrue(drivetrain.rotateToHub());
+        driver.x().whileTrue(drivetrain.rotateToHub());
         
         // OPERATOR
         operator.leftBumper().onTrue(new InstantCommand(() -> shooter.setTargetSpeed(shooter.shootingSpeed)));

@@ -88,6 +88,9 @@ public class Drivetrain extends SubsystemBase {
 
   private double hubAngle;
 
+  private Pose2d hubTargetPose;
+
+
   /**
    * Initialize the drivetrain.
    */
@@ -147,6 +150,7 @@ public class Drivetrain extends SubsystemBase {
   public void periodic() {
     updateOdometry();
     robotPose = getPose();
+    hubTargetPose = new Pose2d(robotPose.getX(), robotPose.getY(), new Rotation2d(Degrees.of(180 + hubAngle)));
     updateEntries();
   }
 
@@ -184,17 +188,17 @@ public class Drivetrain extends SubsystemBase {
         Math.hypot(swerve.getFieldVelocity().vxMetersPerSecond, swerve.getFieldVelocity().vyMetersPerSecond), 3);
     Constants.sendNumberToElastic("Drivetrain Angular Speed", swerve.getFieldVelocity().omegaRadiansPerSecond, 3);
 
-    // if (blueAlliance) {
-    //   Constants.sendNumberToElastic("Hub X", FieldConstants.BLUE_HUB_CENTER_X, 3);
-    //   Constants.sendNumberToElastic("Hub Y", FieldConstants.BLUE_HUB_CENTER_Y, 3);
-    //   hubAngle = Math.atan((robotPose.getY() - FieldConstants.BLUE_HUB_CENTER_Y)
-    //       / (robotPose.getX() - FieldConstants.BLUE_HUB_CENTER_X));
-    // } else {
-    //   Constants.sendNumberToElastic("Hub X", FieldConstants.RED_HUB_CENTER_X, 3);
-    //   Constants.sendNumberToElastic("Hub Y", FieldConstants.RED_HUB_CENTER_Y, 3);
-    //   hubAngle = Math.atan(
-    //       (robotPose.getY() - FieldConstants.RED_HUB_CENTER_Y) / (robotPose.getX() - FieldConstants.RED_HUB_CENTER_X));
-    // }
+    if (blueAlliance) {
+      Constants.sendNumberToElastic("Hub X", FieldConstants.BLUE_HUB_CENTER_X, 3);
+      Constants.sendNumberToElastic("Hub Y", FieldConstants.BLUE_HUB_CENTER_Y, 3);
+      hubAngle = Math.atan((robotPose.getY() - FieldConstants.BLUE_HUB_CENTER_Y)
+          / (robotPose.getX() - FieldConstants.BLUE_HUB_CENTER_X));
+    } else {
+      Constants.sendNumberToElastic("Hub X", FieldConstants.RED_HUB_CENTER_X, 3);
+      Constants.sendNumberToElastic("Hub Y", FieldConstants.RED_HUB_CENTER_Y, 3);
+      hubAngle = Math.atan(
+          (robotPose.getY() - FieldConstants.RED_HUB_CENTER_Y) / (robotPose.getX() - FieldConstants.RED_HUB_CENTER_X));
+    }
 
     Constants.sendNumberToElastic("Hub Angle", Math.toDegrees(hubAngle), 3);
 
@@ -337,11 +341,10 @@ public class Drivetrain extends SubsystemBase {
   /**
    * Rotates the robot such that the front is facing the hub
    */
-  // public Command rotateToHub() {
-  //   Pose2d targetPose = new Pose2d(robotPose.getX(), robotPose.getY(), new Rotation2d(Degrees.of(180 + hubAngle)));
-  //   return new InstantCommand(
-  //       () -> driveToPose(targetPose).schedule());
-  // }
+  public Command rotateToHub() {
+    return new InstantCommand(
+        () -> driveToPose(hubTargetPose).schedule());
+  }
 
   /**
    * Drive with {@link SwerveSetpointGenerator} from 254, implemented by
