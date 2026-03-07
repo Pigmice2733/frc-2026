@@ -39,7 +39,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void toggle() {
-        if (targetSpeed != 0) {
+        if (targetSpeed == 0) {
             targetSpeed = IntakeConfig.INTAKE_SPEED;
         } else {
             targetSpeed = 0;

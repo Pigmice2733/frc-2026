@@ -25,10 +25,10 @@ public class Indexer extends SubsystemBase {
     public void setToSpeed() {
         boolean upToSpeed = SmartDashboard.getBoolean("Up To Speed?", false);
 
-        if (upToSpeed) {
+        // if (upToSpeed) {
             motorA.set(targetSpeed);
             motorB.set(targetSpeed);
-        }
+        // }
     }
 
     public void stop() {
