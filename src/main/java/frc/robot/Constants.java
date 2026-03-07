@@ -49,6 +49,10 @@ public final class Constants {
         public static final double SHOOTING_SPEED = -100; // 5'2" at 75
     }
 
+    public static final class IndexerConfig {
+        public static final double INDEXER_SPEED = -0.6;
+    }
+
     public static final class IntakeConfig {
         public static final double INTAKE_SPEED = 1;
     }

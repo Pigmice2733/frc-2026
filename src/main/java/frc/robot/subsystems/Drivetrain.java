@@ -102,7 +102,7 @@ public class Drivetrain extends SubsystemBase {
         Rotation2d.fromDegrees(0))
         : new Pose2d(new Translation2d(Meter.of(16),
             Meter.of(4)),
-            Rotation2d.fromDegrees(180));
+            Rotation2d.fromDegrees(165));
     // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary
     // objects being created.
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
@@ -201,6 +201,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     Constants.sendNumberToElastic("Hub Angle", Math.toDegrees(hubAngle), 3);
+    Constants.sendNumberToElastic("Hub Target Pose", hubTargetPose.getRotation().getDegrees(), 3);
 
     pidConstants = new PIDConstants(SmartDashboard.getNumber("Drivetrain P", 0),
         SmartDashboard.getNumber("Drivetrain I", 0), SmartDashboard.getNumber("Drivetrain D", 0));
