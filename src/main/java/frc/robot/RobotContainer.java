@@ -53,8 +53,14 @@ public class RobotContainer {
                 () -> robotOriented));
     }
 
+    private void setRobotOriented(boolean value) {
+        this.robotOriented = value;
+    }
+
     private void configureBindings() {
         driver.a().onTrue(drivetrain.reset());
+        driver.rightBumper().onTrue( new InstantCommand(() -> setRobotOriented(true)));
+        driver.rightBumper().onFalse( new InstantCommand(() -> setRobotOriented(false)));
     }
 
     private void buildAutoChooser() {

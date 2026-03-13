@@ -66,7 +66,7 @@ public class Drivetrain extends SubsystemBase {
     swerve.setModuleEncoderAutoSynchronize(false, 1);
     swerve.getGyro().factoryDefault();
     // gyro.setInverted(true);
-    setUpAuto();
+    //setUpAuto();
     RobotModeTriggers.autonomous().onTrue(Commands.runOnce(this::zeroGyroWithAlliance));
 
     fieldWidget = new Field2d();
