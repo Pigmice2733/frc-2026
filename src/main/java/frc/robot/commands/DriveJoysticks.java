@@ -3,6 +3,7 @@ package frc.robot.commands;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Drivetrain;
 
@@ -25,9 +26,9 @@ public class DriveJoysticks extends Command {
   @Override
   public void execute() {
     if (robotOriented.getAsBoolean()) {
-      dvt.driveRobot(x.getAsDouble(), y.getAsDouble(), r.getAsDouble());
+      dvt.drive(new ChassisSpeeds(x.getAsDouble(), y.getAsDouble(), r.getAsDouble()));
     } else {
-      dvt.driveField(x.getAsDouble(), y.getAsDouble(), r.getAsDouble());
+      dvt.driveFieldOriented(new ChassisSpeeds(x.getAsDouble(), y.getAsDouble(), r.getAsDouble()));
     }
   }
 }

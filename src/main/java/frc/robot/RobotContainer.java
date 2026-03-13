@@ -4,9 +4,18 @@
 
 package frc.robot;
 
+import frc.robot.Constants.IndexerConfig;
+import frc.robot.Constants.ShooterConfig;
 import frc.robot.commands.DriveJoysticks;
 import frc.robot.commands.DriveToPose;
+import frc.robot.commands.Autos;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.Indexer;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Vision;
+import frc.robot.util.LoggedAutoChooser;
+import choreo.auto.AutoChooser;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -20,6 +29,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 @SuppressWarnings("unused")
 public class RobotContainer {
     private final Drivetrain drivetrain;
+    private final Vision vision;
+    private final Shooter shooter;
+    private final Intake intake;
+    private final Indexer indexer;
 
     private final CommandXboxController driver;
     private final CommandXboxController operator;
@@ -27,17 +40,20 @@ public class RobotContainer {
 
     private boolean robotOriented;
 
-    private SendableChooser<Command> autoChooser;
+    // private final LoggedAutoChooser autoChooser = new LoggedAutoChooser("Auto Chooser");
 
     public RobotContainer() {
         driver = new CommandXboxController(0);
         operator = new CommandXboxController(1);
         controls = new Controls(driver, operator);
+
         drivetrain = new Drivetrain();
+        vision = new Vision();
+        shooter = new Shooter();
+        intake = new Intake();
+        indexer = new Indexer();
 
         robotOriented = false;
-
-        autoChooser = new SendableChooser<Command>();
 
         configureBindings();
         configureDefaultCommands();
@@ -58,23 +74,40 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        driver.a().onTrue(drivetrain.reset());
+        // DRIVER
+        driver.a().onTrue(new InstantCommand(() -> drivetrain.zeroGyroWithAlliance()));
+
         driver.rightBumper().onTrue( new InstantCommand(() -> setRobotOriented(true)));
         driver.rightBumper().onFalse( new InstantCommand(() -> setRobotOriented(false)));
+
+        // driver.x().onTrue(drivetrain.rotateToHub());
+
+        // OPERATOR
+        operator.leftBumper().onTrue(shooter.setCommand(ShooterConfig.SHOOTING_SPEED));
+        operator.leftTrigger().onTrue(shooter.stopCommand());
+
+        operator.rightBumper().whileTrue(indexer.setCommand(IndexerConfig.INDEXER_SPEED)); // forward
+        operator.rightBumper().whileFalse(indexer.stopCommand());
+        operator.rightTrigger().whileTrue(indexer.setCommand(-IndexerConfig.INDEXER_SPEED)); // backward
+        operator.rightTrigger().whileFalse(indexer.stopCommand());
+        // TODO: add binding for jostle fuel command
+
+        operator.y().whileTrue(new InstantCommand(() -> intake.toggle()));
+        operator.b().onTrue(new InstantCommand(() -> intake.intake()));
+        operator.a().onTrue(new InstantCommand(() -> intake.outtake()));
     }
 
     private void buildAutoChooser() {
-        autoChooser.setDefaultOption("None", Commands.none());
-        autoChooser.addOption("Drive Forward",
-                new DriveToPose(drivetrain, new Transform2d(6.5, 0, new Rotation2d(0))));
-        autoChooser.addOption("Drive Right", new DriveToPose(drivetrain, new Transform2d(0, 2, new Rotation2d(0))));
+        // autoChooser.addCmd("Score", () -> Autos.score(shooter, indexer));
+        // autoChooser.addCmd("Rotate, Score", () -> Autos.rotateScore(drivetrain, shooter, indexer));
+        // autoChooser.addCmd("Position, Rotate, Score", () -> Autos.positionRotateScore(drivetrain, shooter, indexer));
 
-        SmartDashboard.putData("Auto Chooser", autoChooser);
-
+        // SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
     public Command getAutonomousCommand() {
-        return autoChooser.getSelected();
+        // return autoChooser.selectedCommand();
+        return Commands.none();
     }
 
     public void autoInit() {
