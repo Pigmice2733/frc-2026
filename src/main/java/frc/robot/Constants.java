@@ -4,11 +4,8 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Meters;
-
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -24,6 +21,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+
+    public static final boolean TUNING_MODE = false;
+
+    public static boolean isTuningMode() {
+        return !DriverStation.isFMSAttached() && TUNING_MODE;
+    }
 
     public static final double AXIS_THRESHOLD = 0.1;
 
@@ -46,7 +49,16 @@ public final class Constants {
     }
 
     public static final class ShooterConfig {
-        public static final double SHOOTING_SPEED = -100; // 5'2" at 75
+        public static final double SHOOTING_SPEED = 75; // default: 13'0" at 100, 6'2" + data says at 75, 
+                                                        // straight up: 0' at 75 85 100,
+                                                        // point 3: 13'9" + 6' at 100, 12'2" + data at 85, 9'2" + data at 75
+        public static final double ERROR_TOLERANCE = 5;
+
+        public static final double KP = 0.1;
+        public static final double KI = 0.0;
+        public static final double KD = 0.01;
+        public static final double KS = 0.12;
+        public static final double KV = 0.11;
     }
 
     public static final class IndexerConfig {
@@ -55,18 +67,6 @@ public final class Constants {
 
     public static final class IntakeConfig {
         public static final double INTAKE_SPEED = 1;
-    }
-
-    public static final class FieldConstants {
-        public static final AprilTagFieldLayout APRIL_TAG_LAYOUT = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-
-        public static final double HUB_WIDTH = 1.1938; // meters
-
-        public static final double BLUE_HUB_CENTER_X = APRIL_TAG_LAYOUT.getTagPose(26).get().getX() + HUB_WIDTH / 2;
-        public static final double BLUE_HUB_CENTER_Y = APRIL_TAG_LAYOUT.getTagPose(21).get().getY() + HUB_WIDTH / 2;
-
-        public static final double RED_HUB_CENTER_X = APRIL_TAG_LAYOUT.getTagPose(10).get().getX() + HUB_WIDTH / 2;
-        public static final double RED_HUB_CENTER_Y = APRIL_TAG_LAYOUT.getTagPose(5).get().getY() + HUB_WIDTH / 2;
     }
 
     public static void sendNumberToElastic(String name, double num, double places) {

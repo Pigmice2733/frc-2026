@@ -5,6 +5,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import frc.robot.Constants;
 import frc.robot.Constants.CanConfig;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Indexer extends SubsystemBase {
@@ -20,6 +21,7 @@ public class Indexer extends SubsystemBase {
     @Override
     public void periodic() {
         setToSpeed();
+        updateEntries();
     }
 
     public void updateEntries() {
@@ -29,17 +31,23 @@ public class Indexer extends SubsystemBase {
     }
 
     public void setToSpeed() {
-        motorA.set(targetSpeed);
-        motorB.set(targetSpeed);
-    }
-
-    public void stop() {
-        targetSpeed = 0;
+            motorA.set(targetSpeed);
+            motorB.set(targetSpeed);
     }
 
     public void setTargetSpeed(double speed) {
         targetSpeed = speed;
     }
 
+    public void stop() {
+        targetSpeed = 0;
+    }
 
+    public Command setCommand(double speed) {
+        return runOnce(() -> setTargetSpeed(speed));
+    }
+
+    public Command stopCommand() {
+        return runOnce(() -> stop());
+    }
 }

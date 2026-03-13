@@ -8,13 +8,14 @@ import frc.robot.Constants.IndexerConfig;
 import frc.robot.Constants.ShooterConfig;
 import frc.robot.commands.DriveJoysticks;
 import frc.robot.commands.DriveToPose;
-import frc.robot.commands.PositionAndRotateAndScore;
-import frc.robot.commands.RotateAndScore;
+import frc.robot.commands.Autos;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Vision;
+import frc.robot.util.LoggedAutoChooser;
+import choreo.auto.AutoChooser;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -39,7 +40,7 @@ public class RobotContainer {
 
     private boolean robotOriented;
 
-    private SendableChooser<Command> autoChooser;
+    // private final LoggedAutoChooser autoChooser = new LoggedAutoChooser("Auto Chooser");
 
     public RobotContainer() {
         driver = new CommandXboxController(0);
@@ -53,8 +54,6 @@ public class RobotContainer {
         indexer = new Indexer();
 
         robotOriented = false;
-
-        autoChooser = new SendableChooser<Command>();
 
         configureBindings();
         configureDefaultCommands();
@@ -74,16 +73,17 @@ public class RobotContainer {
         // DRIVER
         driver.a().onTrue(new InstantCommand(() -> drivetrain.zeroGyroWithAlliance()));
 
-        driver.x().onTrue(drivetrain.rotateToHub());
-        
-        // OPERATOR
-        operator.leftBumper().onTrue(new InstantCommand(() -> shooter.setTargetSpeed(ShooterConfig.SHOOTING_SPEED)));
-        operator.leftTrigger().onTrue(new InstantCommand(() -> shooter.stopMotor()));
+        // driver.x().onTrue(drivetrain.rotateToHub());
 
-        operator.rightBumper().whileTrue(new InstantCommand(() -> indexer.setTargetSpeed(IndexerConfig.INDEXER_SPEED))); // forward
-        operator.rightBumper().whileFalse(new InstantCommand(() -> indexer.setTargetSpeed(0)));
-        operator.rightTrigger().whileTrue(new InstantCommand(() -> indexer.setTargetSpeed(-IndexerConfig.INDEXER_SPEED))); // backward
-        operator.rightTrigger().whileFalse(new InstantCommand(() -> indexer.setTargetSpeed(0)));
+        // OPERATOR
+        operator.leftBumper().onTrue(shooter.setCommand(ShooterConfig.SHOOTING_SPEED));
+        operator.leftTrigger().onTrue(shooter.stopCommand());
+
+        operator.rightBumper().whileTrue(indexer.setCommand(IndexerConfig.INDEXER_SPEED)); // forward
+        operator.rightBumper().whileFalse(indexer.stopCommand());
+        operator.rightTrigger().whileTrue(indexer.setCommand(-IndexerConfig.INDEXER_SPEED)); // backward
+        operator.rightTrigger().whileFalse(indexer.stopCommand());
+        // TODO: add binding for jostle fuel command
 
         operator.y().whileTrue(new InstantCommand(() -> intake.toggle()));
         operator.b().onTrue(new InstantCommand(() -> intake.intake()));
@@ -91,20 +91,16 @@ public class RobotContainer {
     }
 
     private void buildAutoChooser() {
-        autoChooser.setDefaultOption("None", Commands.none());
-        autoChooser.addOption("Rotate and Score", new RotateAndScore(drivetrain, shooter, indexer));
-        autoChooser.addOption("Position and Rotate and Score", new PositionAndRotateAndScore(drivetrain, shooter, indexer));
-        // autoChooser.addOption("Drive Forward",
-        //         new DriveToPose(drivetrain, new Transform2d(6.5, 0, new Rotation2d(0))));
-        // autoChooser.addOption("Drive Right", new DriveToPose(drivetrain, new Transform2d(0, 2, new Rotation2d(0))));
-        // autoChooser.addOption("Drive Diagonal", drivetrain.driveToPose(new Pose2d(2, 3, new Rotation2d(Math.toRadians(90)))));
+        // autoChooser.addCmd("Score", () -> Autos.score(shooter, indexer));
+        // autoChooser.addCmd("Rotate, Score", () -> Autos.rotateScore(drivetrain, shooter, indexer));
+        // autoChooser.addCmd("Position, Rotate, Score", () -> Autos.positionRotateScore(drivetrain, shooter, indexer));
 
-        SmartDashboard.putData("Auto Chooser", autoChooser);
-
+        // SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
     public Command getAutonomousCommand() {
-        return autoChooser.getSelected();
+        // return autoChooser.selectedCommand();
+        return Commands.none();
     }
 
     public void autoInit() {
