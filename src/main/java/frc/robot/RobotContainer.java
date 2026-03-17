@@ -7,28 +7,21 @@ package frc.robot;
 import frc.robot.Constants.IndexerConfig;
 import frc.robot.Constants.ShooterConfig;
 import frc.robot.commands.DriveJoysticks;
-import frc.robot.commands.DriveToPose;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Vision;
-import frc.robot.util.LoggedAutoChooser;
 import choreo.auto.AutoChooser;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
-@SuppressWarnings("unused")
 public class RobotContainer {
     private final Drivetrain drivetrain;
+    @SuppressWarnings("unused")
     private final Vision vision;
     private final Shooter shooter;
     private final Intake intake;
@@ -40,7 +33,7 @@ public class RobotContainer {
 
     private boolean robotOriented;
 
-    // private final LoggedAutoChooser autoChooser = new LoggedAutoChooser("Auto Chooser");
+    private final AutoChooser autoChooser = new AutoChooser("None");
 
     public RobotContainer() {
         driver = new CommandXboxController(0);
@@ -80,7 +73,7 @@ public class RobotContainer {
         driver.rightBumper().onTrue( new InstantCommand(() -> setRobotOriented(true)));
         driver.rightBumper().onFalse( new InstantCommand(() -> setRobotOriented(false)));
 
-        // driver.x().onTrue(drivetrain.rotateToHub());
+        driver.x().onTrue(drivetrain.rotateToHub());
 
         // OPERATOR
         operator.leftBumper().onTrue(shooter.setCommand(ShooterConfig.SHOOTING_SPEED));
@@ -98,16 +91,15 @@ public class RobotContainer {
     }
 
     private void buildAutoChooser() {
-        // autoChooser.addCmd("Score", () -> Autos.score(shooter, indexer));
-        // autoChooser.addCmd("Rotate, Score", () -> Autos.rotateScore(drivetrain, shooter, indexer));
-        // autoChooser.addCmd("Position, Rotate, Score", () -> Autos.positionRotateScore(drivetrain, shooter, indexer));
+        autoChooser.addCmd("Score", () -> Autos.score(shooter, indexer));
+        autoChooser.addCmd("Rotate, Score", () -> Autos.rotateScore(drivetrain, shooter, indexer));
+        autoChooser.addCmd("Position, Rotate, Score", () -> Autos.positionRotateScore(drivetrain, shooter, indexer));
 
-        // SmartDashboard.putData("Auto Chooser", autoChooser);
+        SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
     public Command getAutonomousCommand() {
-        // return autoChooser.selectedCommand();
-        return Commands.none();
+        return autoChooser.selectedCommand();
     }
 
     public void autoInit() {

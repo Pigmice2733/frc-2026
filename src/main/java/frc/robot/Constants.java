@@ -5,7 +5,6 @@
 package frc.robot;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -23,10 +22,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public final class Constants {
 
     public static final boolean TUNING_MODE = false;
-
-    public static boolean isTuningMode() {
-        return !DriverStation.isFMSAttached() && TUNING_MODE;
-    }
 
     public static final double AXIS_THRESHOLD = 0.1;
 
@@ -49,9 +44,10 @@ public final class Constants {
     }
 
     public static final class ShooterConfig {
-        public static final double SHOOTING_SPEED = 75; // default: 13'0" at 100, 6'2" + data says at 75, 
+        public static final double SHOOTING_SPEED = 75; // default: 13'0" at 100, 6'2" + data says at 75,
                                                         // straight up: 0' at 75 85 100,
-                                                        // point 3: 13'9" + 6' at 100, 12'2" + data at 85, 9'2" + data at 75
+                                                        // point 3: 13'9" + 6' at 100, 12'2" + data at 85, 9'2" + data
+                                                        // at 75
         public static final double ERROR_TOLERANCE = 5;
 
         public static final double KP = 0.1;

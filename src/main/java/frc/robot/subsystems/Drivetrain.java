@@ -8,15 +8,14 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meter;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.DriveFeedforwards;
-import com.pathplanner.lib.util.FlippingUtil;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 
@@ -36,7 +35,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -79,6 +77,11 @@ public class Drivetrain extends SubsystemBase {
   private Pose2d robotPose;
 
   /**
+   * Pid values for the drivetrain.
+   */
+  private PIDConstants pidConstants;
+
+  /**
    * Whether the current alliance station is blue or not.
    */
   private boolean blueAlliance;
@@ -110,10 +113,15 @@ public class Drivetrain extends SubsystemBase {
   public Drivetrain() {
     SmartDashboard.putData(field); // Put a field widget into smart dashboard
     blueAlliance = DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue;
-    Pose2d startingPose = new Pose2d(new Translation2d(Meter.of(1), Meter.of(4)), Rotation2d.fromDegrees(0));
-    if (!blueAlliance) {
-      FlippingUtil.flipFieldPose(startingPose);
-    }
+    Pose2d startingPose = blueAlliance ? new Pose2d(new Translation2d(Meter.of(1),
+        Meter.of(4)),
+        Rotation2d.fromDegrees(0))
+        : new Pose2d(new Translation2d(Meter.of(16),
+            Meter.of(4)),
+            Rotation2d.fromDegrees(180));
+    hubTargetAnglePose = new Pose2d();
+    hubTargetPose = new Pose2d();
+    robotPose = new Pose2d();
     // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary
     // objects being created.
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
@@ -167,10 +175,7 @@ public class Drivetrain extends SubsystemBase {
     updateEntries();
   }
 
-  /**
-   * Update the position of the sweve modules based on any april tags seen by the
-   * robot
-   */
+  /** Updates the field relative position of the robot. */
   public void updateOdometry() {
     boolean doRejectUpdate = false;
 
@@ -235,6 +240,10 @@ public class Drivetrain extends SubsystemBase {
 
     field.setRobotPose(robotPose);
     SmartDashboard.putData("Field", field);
+
+    pidConstants = new PIDConstants(SmartDashboard.getNumber("Drivetrain P", 0),
+        SmartDashboard.getNumber("Drivetrain I", 0), SmartDashboard.getNumber("Drivetrain D", 0));
+
   }
 
   @Override
@@ -305,8 +314,7 @@ public class Drivetrain extends SubsystemBase {
 
     // Preload PathPlanner Path finding
     // IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
-    CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
-    System.out.println("Pathplanner configured!");
+    PathfindingCommand.warmupCommand().schedule();
   }
 
   /**
@@ -351,37 +359,36 @@ public class Drivetrain extends SubsystemBase {
    * @param pose Target {@link Pose2d} to go to.
    * @return PathFinding command
    */
-  // public Command driveToPose(Pose2d pose) {
-  //   // Create the constraints to use while pathfinding
-  //   PathConstraints constraints = new PathConstraints(
-  //       swerve.getMaximumChassisVelocity(), 4.0,
-  //       swerve.getMaximumChassisAngularVelocity(), Units.degreesToRadians(720));
+  public Command driveToPose(Pose2d pose) {
+    // Create the constraints to use while pathfinding
+    PathConstraints constraints = new PathConstraints(
+        swerve.getMaximumChassisVelocity(), 4.0,
+        swerve.getMaximumChassisAngularVelocity(), Units.degreesToRadians(720));
 
-  //   System.out.println("Pose: " + pose);
-
-  //   // Since AutoBuilder is configured, we can use it to build pathfinding commands
-  //   return AutoBuilder.pathfindToPose(
-  //       pose,
-  //       constraints
-  //   // edu.wpi.first.units.Units.MetersPerSecond.of(0) // Goal end velocity in
-  //   // meters/sec
-  //   );
-  // }
+    // Since AutoBuilder is configured, we can use it to build pathfinding commands
+    return AutoBuilder.pathfindToPose(
+        pose,
+        constraints,
+        edu.wpi.first.units.Units.MetersPerSecond.of(0) // Goal end velocity in meters/sec
+    );
+  }
 
   /**
    * Rotates the robot such that the shooter is facing the hub
    */
-  // public Command rotateToHub() {
-  //   return driveToPose(hubTargetAnglePose);
-  // }
+  public Command rotateToHub() {
+    System.out.println("Pose: " + hubTargetAnglePose.getX() + ", " + hubTargetAnglePose.getY() + ", " + hubTargetAnglePose.getRotation().getDegrees());
+    return driveToPose(hubTargetAnglePose);
+  }
 
   /**
    * Positions the robot such that the shooter is facing the hub at the correct
    * distance away given the setpoint of the shooter
    */
-  // public Command positionXToHub() {
-  //   return driveToPose(hubTargetPose);
-  // }
+  public Command positionXToHub() {
+    System.out.println("Pose: " + hubTargetPose.getX() + ", " + hubTargetPose.getY() + ", " + hubTargetPose.getRotation().getDegrees());
+    return driveToPose(hubTargetPose);
+  }
 
   /**
    * Drive with {@link SwerveSetpointGenerator} from 254, implemented by
