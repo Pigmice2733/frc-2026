@@ -24,7 +24,7 @@ public class Shooter extends SubsystemBase {
     private TalonFXConfiguration config;
 
     private double targetSpeed;
-    private VelocityVoltage velocityVoltage;
+    private VelocityVoltage velocityVoltageRequest;
 
     private PIDConfig pidConfig;
 
@@ -39,7 +39,7 @@ public class Shooter extends SubsystemBase {
 
         motor = new TalonFX(CanConfig.SHOOTER_ID);
         config = new TalonFXConfiguration();
-        velocityVoltage = new VelocityVoltage(0).withSlot(0);
+        velocityVoltageRequest = new VelocityVoltage(0).withSlot(0);
 
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -82,7 +82,7 @@ public class Shooter extends SubsystemBase {
      */
     public void setTargetSpeed(double rps) {
         targetSpeed = rps;
-        motor.setControl(velocityVoltage.withVelocity(targetSpeed));
+        motor.setControl(velocityVoltageRequest.withVelocity(targetSpeed));
     }
 
     /**

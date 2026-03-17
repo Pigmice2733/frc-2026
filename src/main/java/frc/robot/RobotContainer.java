@@ -69,6 +69,7 @@ public class RobotContainer {
     private void configureBindings() {
         // DRIVER
         driver.a().onTrue(new InstantCommand(() -> drivetrain.zeroGyroWithAlliance()));
+        driver.b().onTrue(new InstantCommand(() -> drivetrain.lock()));
 
         driver.rightBumper().onTrue( new InstantCommand(() -> setRobotOriented(true)));
         driver.rightBumper().onFalse( new InstantCommand(() -> setRobotOriented(false)));

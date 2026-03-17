@@ -43,13 +43,6 @@ import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.Constants.DrivetrainConfig;
 import frc.robot.LimelightHelpers;
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
-import org.json.simple.parser.ParseException;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
 import swervelib.SwerveDriveTest;
@@ -59,6 +52,14 @@ import swervelib.parser.SwerveDriveConfiguration;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+import org.json.simple.parser.ParseException;
 
 public class Drivetrain extends SubsystemBase {
   /**
@@ -77,7 +78,7 @@ public class Drivetrain extends SubsystemBase {
   private Pose2d robotPose;
 
   /**
-   * Pid values for the drivetrain.
+   * PID values for the drivetrain.
    */
   private PIDConstants pidConstants;
 
