@@ -12,6 +12,8 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+
 public class SwerveModule {
 
     private final SparkMax drive;
@@ -43,5 +45,13 @@ public class SwerveModule {
         drive.configure(driveConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
         angle.configure(angleConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
         cancoder.getConfigurator().apply(cancoderConfig);
+    }
+
+    public void setTurnPosition(Rotation2d rotation) {
+        
+    }
+
+    public void setDriveVoltage(double voltage) {
+        drive.setVoltage(voltage);
     }
 }

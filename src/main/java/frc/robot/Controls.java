@@ -49,7 +49,7 @@ public class Controls {
     public double getTurnSpeed() {
         double joystickTurn = MathUtil.applyDeadband(driver.getRightX(), threshold);
 
-        return -joystickTurn * DrivetrainConfig.MAX_TURN_SPEED;
+        return joystickTurn * DrivetrainConfig.MAX_TURN_SPEED;
     }
 
     /**

@@ -15,8 +15,8 @@ public class DriveToPose extends Command {
 
     private PIDController xPID, yPID, rPID;
 
-    public DriveToPose(Drivetrain dtr, Transform2d path) {
-        drivetrain = dtr;
+    public DriveToPose(Drivetrain dvt, Transform2d path) {
+        drivetrain = dvt;
         this.path = path;
         xPID = yPID = DrivetrainConfig.DRIVE_PID;
         rPID = DrivetrainConfig.TURN_PID;
@@ -39,10 +39,15 @@ public class DriveToPose extends Command {
     @Override
     public void execute() {
         currentPose = drivetrain.getPose();
-        if (endPose.getX() > currentPose.getX()) {
-            drivetrain.driveFieldOriented(new ChassisSpeeds(0.75, 0, 0));
-        } else if (endPose.getY() > currentPose.getY()) {
-            drivetrain.driveFieldOriented(new ChassisSpeeds(0, 0.75, 0));
+        if (endPose.getX() > currentPose.getX() || endPose.getY() > currentPose.getY() || endPose.getRotation().getDegrees() != currentPose.getRotation().getDegrees()) {
+            if (endPose.getX() > currentPose.getX()) {
+                drivetrain.driveFieldOriented(new ChassisSpeeds(0.75, 0, 0));
+            }
+            if (endPose.getY() > currentPose.getY()) {
+                drivetrain.driveFieldOriented(new ChassisSpeeds(0, 0.75, 0));
+            }
+            if (endPose.getRotation().getDegrees() != currentPose.getRotation().getDegrees()) {
+            }
         } else {
             drivetrain.driveFieldOriented(new ChassisSpeeds(0, 0, 0));
         }

@@ -23,6 +23,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -42,6 +43,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.Constants.DrivetrainConfig;
+import frc.robot.FieldConstants.Hub;
+import frc.robot.commands.DriveToPose;
 import frc.robot.LimelightHelpers;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
@@ -107,6 +110,10 @@ public class Drivetrain extends SubsystemBase {
    * A pose incorporating the hub angle and hub translation
    */
   private Pose2d hubTargetPose;
+
+  private double hubDistance;
+
+  private boolean facingHub;
 
   /**
    * Initialize the drivetrain.
@@ -245,6 +252,11 @@ public class Drivetrain extends SubsystemBase {
     pidConstants = new PIDConstants(SmartDashboard.getNumber("Drivetrain P", 0),
         SmartDashboard.getNumber("Drivetrain I", 0), SmartDashboard.getNumber("Drivetrain D", 0));
 
+    facingHub = Math.abs(hubAngle - robotPose.getRotation().getDegrees()) < 5;
+    SmartDashboard.putBoolean("Facing Hub?", facingHub);
+
+    hubDistance = Math.hypot(robotPose.getX() - Hub.oppTopCenterPoint.getX(), robotPose.getY() - Hub.topCenterPoint.getY());
+    Constants.sendNumberToElastic("Hub Distance", hubDistance, 2);
   }
 
   @Override
@@ -388,7 +400,7 @@ public class Drivetrain extends SubsystemBase {
    */
   public Command positionXToHub() {
     System.out.println("Pose: " + hubTargetPose.getX() + ", " + hubTargetPose.getY() + ", " + hubTargetPose.getRotation().getDegrees());
-    return driveToPose(hubTargetPose);
+    return new DriveToPose(this, new Transform2d(new Translation2d(hubTranslation, 0), new Rotation2d()));
   }
 
   /**
