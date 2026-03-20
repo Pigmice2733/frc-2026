@@ -55,6 +55,9 @@ public final class Constants {
         public static final double KD = 0.01;
         public static final double KS = 0.12;
         public static final double KV = 0.11;
+
+        public static final double INITIAL_HEIGHT = 0.4572;
+        public static final double HOOD_ANGLE = 75;
     }
 
     public static final class IndexerConfig {

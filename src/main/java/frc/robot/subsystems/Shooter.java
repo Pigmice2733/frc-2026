@@ -29,6 +29,9 @@ public class Shooter extends SubsystemBase {
     private PIDConfig pidConfig;
 
     private DashboardNumber shootingSpeed;
+    private double hubSpeed = ShooterConfig.SHOOTING_SPEED;
+
+    private boolean hubRelative = false;
 
     /**
      * Create a new Shooter.
@@ -54,7 +57,9 @@ public class Shooter extends SubsystemBase {
     @Override
     public void periodic() {
         updateEntries();
-        if (targetSpeed != shootingSpeed.getAsDouble() && targetSpeed != 0) {
+        if (hubRelative) {
+            setTargetSpeed(hubSpeed);
+        } else if (targetSpeed != shootingSpeed.getAsDouble() && targetSpeed != 0) {
             setTargetSpeed(shootingSpeed.getAsDouble());
         }
     }
@@ -73,6 +78,7 @@ public class Shooter extends SubsystemBase {
         }
 
         shootingSpeed.updateValue();
+        hubSpeed = SmartDashboard.getNumber("Flywheel Velocity Calculation", shootingSpeed.getAsDouble());
     }
 
     /**
@@ -82,7 +88,18 @@ public class Shooter extends SubsystemBase {
      */
     public void setTargetSpeed(double rps) {
         targetSpeed = rps;
+        if (Math.abs(targetSpeed) > 100) {
+            targetSpeed = 100;
+        }
         motor.setControl(velocityVoltageRequest.withVelocity(targetSpeed));
+    }
+
+    public void toggleHubRelative() {
+        hubRelative = !hubRelative;
+    }
+
+    public void setHubRelative(boolean hubRelative) {
+        this.hubRelative = hubRelative;
     }
 
     /**
@@ -114,6 +131,14 @@ public class Shooter extends SubsystemBase {
      */
     public Command shootCommand() {
         return setCommand(shootingSpeed.getAsDouble());
+    }
+
+    public Command hubRelativeCommand(boolean hubRelative) {
+        return runOnce(() -> setHubRelative(hubRelative));
+    }
+
+    public Command hubRelativeToggleCommand() {
+        return runOnce(() -> toggleHubRelative());
     }
 
     public void configPID(double kP, double kI, double kD, double kS, double kV) {

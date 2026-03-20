@@ -19,15 +19,20 @@ import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.units.AngularVelocityUnit;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -43,6 +48,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.Constants.DrivetrainConfig;
+import frc.robot.Constants.ShooterConfig;
 import frc.robot.FieldConstants.Hub;
 import frc.robot.commands.DriveToPose;
 import frc.robot.LimelightHelpers;
@@ -58,6 +64,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ShortBuffer;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleSupplier;
@@ -185,27 +192,23 @@ public class Drivetrain extends SubsystemBase {
 
   /** Updates the field relative position of the robot. */
   public void updateOdometry() {
-    boolean doRejectUpdate = false;
+    boolean doUpdate = true;
+    LimelightHelpers.SetRobotOrientation("limelight", swerve.getPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+    LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
 
-    LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
-
-    if (mt1.tagCount == 1 && mt1.rawFiducials.length == 1) {
-      if (mt1.rawFiducials[0].ambiguity > .7) {
-        doRejectUpdate = true;
-      }
-      if (mt1.rawFiducials[0].distToCamera > 3) {
-        doRejectUpdate = true;
-      }
+    // if our angular velocity is greater than 360 degrees per second, ignore vision
+    // updates
+    if (Math.abs(swerve.getGyro().getYawAngularVelocity().in(edu.wpi.first.units.Units.DegreesPerSecond)) > 360) {
+      doUpdate = false;
     }
-    if (mt1.tagCount == 0) {
-      doRejectUpdate = true;
+    if (mt2.tagCount == 0) {
+      doUpdate = false;
     }
-
-    if (!doRejectUpdate) {
-      swerve.setVisionMeasurementStdDevs(VecBuilder.fill(.5, .5, 9999999));
+    if (doUpdate) {
+      swerve.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
       swerve.addVisionMeasurement(
-          mt1.pose,
-          mt1.timestampSeconds);
+          mt2.pose,
+          mt2.timestampSeconds);
     }
   }
 
@@ -213,6 +216,8 @@ public class Drivetrain extends SubsystemBase {
    * Update values being sent to elastic
    */
   private void updateEntries() {
+    Translation3d hubCenterPoint = blueAlliance ? Hub.topCenterPoint : Hub.oppTopCenterPoint;
+
     Constants.sendNumberToElastic("Robot X", robotPose.getX(), 3);
     Constants.sendNumberToElastic("Robot Y", robotPose.getY(), 3);
     Constants.sendNumberToElastic("Robot Angle", robotPose.getRotation().getDegrees(), 1);
@@ -252,11 +257,26 @@ public class Drivetrain extends SubsystemBase {
     pidConstants = new PIDConstants(SmartDashboard.getNumber("Drivetrain P", 0),
         SmartDashboard.getNumber("Drivetrain I", 0), SmartDashboard.getNumber("Drivetrain D", 0));
 
-    facingHub = Math.abs(hubAngle - robotPose.getRotation().getDegrees()) < 5;
+    facingHub = Math.abs(robotPose.getRotation().getDegrees() - Math.toDegrees(hubAngle) - 90) < 5;
+    Constants.sendNumberToElastic("Facing Hub Calculation",
+        robotPose.getRotation().getDegrees() - Math.toDegrees(hubAngle) - 90, 3);
     SmartDashboard.putBoolean("Facing Hub?", facingHub);
 
-    hubDistance = Math.hypot(robotPose.getX() - Hub.oppTopCenterPoint.getX(), robotPose.getY() - Hub.topCenterPoint.getY());
+    hubDistance = blueAlliance
+        ? Math.hypot(Hub.topCenterPoint.getX() - robotPose.getX(), Hub.topCenterPoint.getY() - robotPose.getY())
+        : Math.hypot(robotPose.getX() - Hub.oppTopCenterPoint.getX(), robotPose.getY() - Hub.oppTopCenterPoint.getY());
     Constants.sendNumberToElastic("Hub Distance", hubDistance, 2);
+    Constants.sendNumberToElastic("Hub Center X", Hub.oppTopCenterPoint.getX(), 2);
+    Constants.sendNumberToElastic("Hub Center Y", Hub.oppTopCenterPoint.getY(), 2);
+
+    double fuelVelocity = Math.sqrt(
+        (9.8 * Math.pow(hubDistance, 2)) / (2 * Math.pow(Math.cos(Units.degreesToRadians(ShooterConfig.HOOD_ANGLE)), 2)
+            * (ShooterConfig.INITIAL_HEIGHT + Math.tan(Units.degreesToRadians(ShooterConfig.HOOD_ANGLE)) * hubDistance
+                - (hubCenterPoint.getZ() - ShooterConfig.INITIAL_HEIGHT))));
+    double flywheelRPS = 100 * (fuelVelocity / 9);
+    Constants.sendNumberToElastic("Fuel Velocity Calculation", fuelVelocity, 3);
+    Constants.sendNumberToElastic("Flywheel RPS Calculation", flywheelRPS, 3);
+
   }
 
   @Override
@@ -390,7 +410,8 @@ public class Drivetrain extends SubsystemBase {
    * Rotates the robot such that the shooter is facing the hub
    */
   public Command rotateToHub() {
-    System.out.println("Pose: " + hubTargetAnglePose.getX() + ", " + hubTargetAnglePose.getY() + ", " + hubTargetAnglePose.getRotation().getDegrees());
+    System.out.println("Pose: " + hubTargetAnglePose.getX() + ", " + hubTargetAnglePose.getY() + ", "
+        + hubTargetAnglePose.getRotation().getDegrees());
     return driveToPose(hubTargetAnglePose);
   }
 
@@ -399,7 +420,8 @@ public class Drivetrain extends SubsystemBase {
    * distance away given the setpoint of the shooter
    */
   public Command positionXToHub() {
-    System.out.println("Pose: " + hubTargetPose.getX() + ", " + hubTargetPose.getY() + ", " + hubTargetPose.getRotation().getDegrees());
+    System.out.println("Pose: " + hubTargetPose.getX() + ", " + hubTargetPose.getY() + ", "
+        + hubTargetPose.getRotation().getDegrees());
     return new DriveToPose(this, new Transform2d(new Translation2d(hubTranslation, 0), new Rotation2d()));
   }
 

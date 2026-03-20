@@ -78,16 +78,18 @@ public class RobotContainer {
         // OPERATOR
         operator.leftBumper().onTrue(shooter.setCommand(ShooterConfig.SHOOTING_SPEED));
         operator.leftTrigger().onTrue(shooter.stopCommand());
+        operator.x().onTrue(shooter.hubRelativeToggleCommand());
 
         operator.rightBumper().whileTrue(indexer.setCommand(IndexerConfig.INDEXER_SPEED)); // forward
         operator.rightBumper().whileFalse(indexer.stopCommand());
         operator.rightTrigger().whileTrue(indexer.setCommand(-IndexerConfig.INDEXER_SPEED)); // backward
         operator.rightTrigger().whileFalse(indexer.stopCommand());
-        // TODO: add binding for jostle fuel command
+        // TODO: add binding for jostle fuel command?
 
         operator.y().whileTrue(new InstantCommand(() -> intake.toggle()));
         operator.b().onTrue(new InstantCommand(() -> intake.intake()));
         operator.a().onTrue(new InstantCommand(() -> intake.outtake()));
+
     }
 
     private void buildAutoChooser() {
