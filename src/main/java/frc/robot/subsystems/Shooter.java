@@ -30,6 +30,7 @@ public class Shooter extends SubsystemBase {
 
     private DashboardNumber shootingSpeed;
     private double hubSpeed = ShooterConfig.SHOOTING_SPEED;
+    private double setpoint = 0;
 
     private boolean hubRelative = false;
 
@@ -57,9 +58,12 @@ public class Shooter extends SubsystemBase {
     @Override
     public void periodic() {
         updateEntries();
-        if (hubRelative) {
-            setTargetSpeed(hubSpeed);
-        } else if (targetSpeed != shootingSpeed.getAsDouble() && targetSpeed != 0) {
+        if (setpoint == 0) {
+            stopMotor();
+        }
+        if (setpoint != 0 && hubRelative) {
+            setTargetSpeed(setpoint);
+        } else if (setpoint != 0) {
             setTargetSpeed(shootingSpeed.getAsDouble());
         }
     }
@@ -68,7 +72,7 @@ public class Shooter extends SubsystemBase {
      * Update values being sent to elastic
      */
     public void updateEntries() {
-        Constants.sendNumberToElastic("Shooter Target Speed", targetSpeed, 3);
+        Constants.sendNumberToElastic("Shooter Target Speed", setpoint, 3);
         Constants.sendNumberToElastic("Shooter RPS", motor.getVelocity().getValueAsDouble(), 2);
         SmartDashboard.putBoolean("Shooter At Setpoint?", atSetpoint());
 
@@ -78,7 +82,10 @@ public class Shooter extends SubsystemBase {
         }
 
         shootingSpeed.updateValue();
-        hubSpeed = SmartDashboard.getNumber("Flywheel Velocity Calculation", shootingSpeed.getAsDouble());
+        hubSpeed = SmartDashboard.getNumber("Flywheel RPS Calculation", shootingSpeed.getAsDouble());
+        Constants.sendNumberToElastic("Hub Speed", hubSpeed, 2);
+
+        SmartDashboard.putBoolean("Hub Relative", hubRelative);
     }
 
     /**
@@ -87,28 +94,10 @@ public class Shooter extends SubsystemBase {
      * @param rps Requested rotations per second
      */
     public void setTargetSpeed(double rps) {
-        targetSpeed = rps;
-        if (Math.abs(targetSpeed) > 100) {
-            targetSpeed = 100;
+        if (Math.abs(rps) > 100) {
+            rps = 100;
         }
-        motor.setControl(velocityVoltageRequest.withVelocity(targetSpeed));
-    }
-
-    public void toggleHubRelative() {
-        hubRelative = !hubRelative;
-    }
-
-    public void setHubRelative(boolean hubRelative) {
-        this.hubRelative = hubRelative;
-    }
-
-    /**
-     * Set the speed of the shooter to a given amount of rotations per second.
-     * 
-     * @param rps Requested rotations per second
-     */
-    public Command setCommand(double rps) {
-        return runOnce(() -> setTargetSpeed(rps));
+        motor.setControl(velocityVoltageRequest.withVelocity(rps));
     }
 
     /**
@@ -119,26 +108,22 @@ public class Shooter extends SubsystemBase {
         motor.setControl(new NeutralOut());
     }
 
-    /**
-     * Set the shooter to neutral mode
-     */
-    public Command stopCommand() {
-        return runOnce(() -> stopMotor());
+    public void toggleOn() {
+        hubRelative = true;
+        setpoint = hubSpeed;
     }
 
-    /**
-     * Sets the speed of the shooter to the hub target RPS
-     */
-    public Command shootCommand() {
-        return setCommand(shootingSpeed.getAsDouble());
+    public void toggleOff() {
+        hubRelative = false;
+        setpoint = 0;
     }
 
-    public Command hubRelativeCommand(boolean hubRelative) {
-        return runOnce(() -> setHubRelative(hubRelative));
+    public Command toggleOnCommand() {
+        return runOnce(() -> toggleOn());
     }
 
-    public Command hubRelativeToggleCommand() {
-        return runOnce(() -> toggleHubRelative());
+    public Command toggleOffCommand() {
+        return runOnce(() -> toggleOff());
     }
 
     public void configPID(double kP, double kI, double kD, double kS, double kV) {

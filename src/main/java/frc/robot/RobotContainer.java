@@ -76,9 +76,8 @@ public class RobotContainer {
         driver.x().onTrue(drivetrain.rotateToHub());
 
         // OPERATOR
-        operator.leftBumper().onTrue(shooter.setCommand(ShooterConfig.SHOOTING_SPEED));
-        operator.leftTrigger().onTrue(shooter.stopCommand());
-        operator.x().onTrue(shooter.hubRelativeToggleCommand());
+        operator.leftBumper().onTrue(shooter.toggleOnCommand());
+        operator.leftTrigger().onTrue(shooter.toggleOffCommand());
 
         operator.rightBumper().whileTrue(indexer.setCommand(IndexerConfig.INDEXER_SPEED)); // forward
         operator.rightBumper().whileFalse(indexer.stopCommand());

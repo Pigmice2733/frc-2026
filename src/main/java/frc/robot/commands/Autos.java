@@ -12,7 +12,7 @@ public class Autos {
 
     public static Command score(Shooter shtr, Indexer indx) {
         return new SpacedCommandGroup(1, 
-                shtr.shootCommand(),
+                shtr.toggleOnCommand(),
                 new DelayedCommand(() -> shtr.atSetpoint(), indx.setCommand(IndexerConfig.INDEXER_SPEED)));
     }
 
