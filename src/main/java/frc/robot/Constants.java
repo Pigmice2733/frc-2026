@@ -44,13 +44,13 @@ public final class Constants {
     }
 
     public static final class ShooterConfig {
-        public static final double SHOOTING_SPEED = 75; // default: 13'0" at 100, 6'2" + data says at 75,
+        public static final double SHOOTING_SPEED = 100; // default: 13'0" at 100, 6'2" + data says at 75,
                                                         // straight up: 0' at 75 85 100,
                                                         // point 3: 13'9" + 6' at 100, 12'2" + data at 85, 9'2" + data
                                                         // at 75
         public static final double ERROR_TOLERANCE = 5;
 
-        public static final double KP = 0.1;
+        public static final double KP = 0.15;
         public static final double KI = 0.0;
         public static final double KD = 0.01;
         public static final double KS = 0.12;
@@ -65,7 +65,7 @@ public final class Constants {
     }
 
     public static final class IntakeConfig {
-        public static final double INTAKE_SPEED = 0.6;
+        public static final double INTAKE_SPEED = 1;
     }
 
     public static void sendNumberToElastic(String name, double num, double places) {

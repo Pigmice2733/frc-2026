@@ -25,7 +25,6 @@ public class DriveToPose extends Command {
 
     @Override
     public void initialize() {
-        drivetrain.resetOdometry(new Pose2d());
         currentPose = drivetrain.getPose();
         endPose = currentPose.transformBy(path);
 
@@ -39,14 +38,31 @@ public class DriveToPose extends Command {
     @Override
     public void execute() {
         currentPose = drivetrain.getPose();
-        if (endPose.getX() > currentPose.getX() || endPose.getY() > currentPose.getY() || endPose.getRotation().getDegrees() != currentPose.getRotation().getDegrees()) {
-            if (endPose.getX() > currentPose.getX()) {
-                drivetrain.driveFieldOriented(new ChassisSpeeds(0.75, 0, 0));
+        if (endPose.getX() != currentPose.getX() || endPose.getY() != currentPose.getY()
+                || endPose.getRotation().getDegrees() != currentPose.getRotation().getDegrees()) {
+            if (endPose.getX() != currentPose.getX()) {
+                if (endPose.getX() < currentPose.getX()) {
+                    drivetrain.driveFieldOriented(new ChassisSpeeds(-0.75, 0, 0));
+                }
+                if (endPose.getX() > currentPose.getX()) {
+                    drivetrain.driveFieldOriented(new ChassisSpeeds(0.75, 0, 0));
+                }
             }
-            if (endPose.getY() > currentPose.getY()) {
-                drivetrain.driveFieldOriented(new ChassisSpeeds(0, 0.75, 0));
+            if (endPose.getY() != currentPose.getY()) {
+                if (endPose.getY() < currentPose.getY()) {
+                    drivetrain.driveFieldOriented(new ChassisSpeeds(0, -0.75, 0));
+                }
+                if (endPose.getY() > currentPose.getY()) {
+                    drivetrain.driveFieldOriented(new ChassisSpeeds(0, 0.75, 0));
+                }
             }
             if (endPose.getRotation().getDegrees() != currentPose.getRotation().getDegrees()) {
+                if (endPose.getRotation().getDegrees() < currentPose.getRotation().getDegrees()) {
+                    drivetrain.driveFieldOriented(new ChassisSpeeds(0, 0, 1.5));
+                }
+                if (endPose.getRotation().getDegrees() > currentPose.getRotation().getDegrees()) {
+                    drivetrain.driveFieldOriented(new ChassisSpeeds(0, 0, -1.5));
+                }
             }
         } else {
             drivetrain.driveFieldOriented(new ChassisSpeeds(0, 0, 0));

@@ -123,12 +123,14 @@ public class Drivetrain extends SubsystemBase {
   public Drivetrain() {
     SmartDashboard.putData(field); // Put a field widget into smart dashboard
     blueAlliance = DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue;
-    Pose2d startingPose = blueAlliance ? new Pose2d(new Translation2d(Meter.of(1),
-        Meter.of(4)),
-        Rotation2d.fromDegrees(0))
-        : new Pose2d(new Translation2d(Meter.of(16),
-            Meter.of(4)),
-            Rotation2d.fromDegrees(180));
+    // Pose2d startingPose = blueAlliance ? new Pose2d(new Translation2d(Meter.of(1),
+    //     Meter.of(4)),
+    //     Rotation2d.fromDegrees(0))
+    //     : new Pose2d(new Translation2d(Meter.of(16),
+    //         Meter.of(4)),
+    //         Rotation2d.fromDegrees(180));
+    Pose2d startingPose = new Pose2d(Hub.oppTopCenterPoint.getX() + Units.inchesToMeters(43.75), FieldConstants.fieldWidth / 2, Rotation2d.fromDegrees(90));
+    System.out.println(startingPose.getX());
     hubTargetAnglePose = new Pose2d();
     hubTargetPose = new Pose2d();
     robotPose = new Pose2d();
@@ -158,7 +160,7 @@ public class Drivetrain extends SubsystemBase {
     // swerveDrive.pushOffsetsToEncoders(); // Set the absolute encoder to be used
     // over the internal encoder and push the offsets onto it. Throws warning if not
     // possible
-    setupPathPlanner();
+    // setupPathPlanner();
   }
 
   /**
@@ -180,7 +182,7 @@ public class Drivetrain extends SubsystemBase {
     updateOdometry();
     robotPose = getPose();
     hubTargetAnglePose = new Pose2d(robotPose.getX(), robotPose.getY(), new Rotation2d(Degrees.of(270 + hubAngle)));
-    hubTargetPose = new Pose2d(robotPose.getX() + (hubTranslation * (blueAlliance ? -1 : 1)), robotPose.getY(),
+    hubTargetPose = new Pose2d(robotPose.getX() + (hubTranslation * (isBlueAlliance() ? -1 : 1)), robotPose.getY(),
         hubTargetAnglePose.getRotation());
     updateEntries();
   }
@@ -211,8 +213,9 @@ public class Drivetrain extends SubsystemBase {
    * Update values being sent to elastic
    */
   private void updateEntries() {
-    Translation3d hubCenterPoint = blueAlliance ? Hub.topCenterPoint : Hub.oppTopCenterPoint;
+    Translation3d hubCenterPoint = isBlueAlliance() ? Hub.topCenterPoint : Hub.oppTopCenterPoint;
 
+    SmartDashboard.putBoolean("Blue Alliance", isBlueAlliance());
     Constants.sendNumberToElastic("Robot X", robotPose.getX(), 3);
     Constants.sendNumberToElastic("Robot Y", robotPose.getY(), 3);
     Constants.sendNumberToElastic("Robot Angle", robotPose.getRotation().getDegrees(), 1);
@@ -221,27 +224,12 @@ public class Drivetrain extends SubsystemBase {
         Math.hypot(swerve.getFieldVelocity().vxMetersPerSecond, swerve.getFieldVelocity().vyMetersPerSecond), 3);
     Constants.sendNumberToElastic("Drivetrain Angular Speed", swerve.getFieldVelocity().omegaRadiansPerSecond, 3);
 
-    if (!blueAlliance) {
-      // Constants.sendNumberToElastic("Hub X", FieldConstants.BLUE_HUB_CENTER_X, 3);
-      // Constants.sendNumberToElastic("Hub Y", FieldConstants.BLUE_HUB_CENTER_Y, 3);
-      hubAngle = Math.atan((robotPose.getY() - FieldConstants.Hub.oppTopCenterPoint.getY())
-          / (robotPose.getX() - FieldConstants.Hub.oppTopCenterPoint.getX()));
-    } else {
-      // Constants.sendNumberToElastic("Hub X", FieldConstants.RED_HUB_CENTER_X, 3);
-      // Constants.sendNumberToElastic("Hub Y", FieldConstants.RED_HUB_CENTER_Y, 3);
-      hubAngle = Math.atan(
-          (robotPose.getY() - FieldConstants.Hub.topCenterPoint.getY())
-              / (robotPose.getX() - FieldConstants.Hub.topCenterPoint.getX()));
-    }
+    hubAngle = Math.atan(
+      (robotPose.getY() - hubCenterPoint.getY())
+      / (robotPose.getX() - hubCenterPoint.getX()));
 
-    if (!blueAlliance) {
-      hubTranslation = Math.pow(Units.feetToMeters(13), 2)
-          - Math.pow(FieldConstants.Hub.oppTopCenterPoint.getY() - robotPose.getY(), 2);
-    } else {
-      hubTranslation = Math.pow(Units.feetToMeters(13), 2)
-          - Math.pow(FieldConstants.Hub.topCenterPoint.getY() - robotPose.getY(), 2);
-
-    }
+    hubTranslation = Math.pow(Units.feetToMeters(13), 2)
+      - Math.pow(hubCenterPoint.getY() - robotPose.getY(), 2);
 
     Constants.sendNumberToElastic("Hub Angle", Math.toDegrees(hubAngle), 3);
     Constants.sendNumberToElastic("Hub Target Pose", hubTargetAnglePose.getRotation().getDegrees(), 3);
@@ -252,21 +240,21 @@ public class Drivetrain extends SubsystemBase {
     pidConstants = new PIDConstants(SmartDashboard.getNumber("Drivetrain P", 0),
         SmartDashboard.getNumber("Drivetrain I", 0), SmartDashboard.getNumber("Drivetrain D", 0));
 
-    facingHub = Math.abs(robotPose.getRotation().getDegrees() - Math.toDegrees(hubAngle) - 90) < 5;
+    facingHub = Math.abs(robotPose.getRotation().getDegrees() - Math.toDegrees(hubAngle) + (90 * (isBlueAlliance() ? 1 : -1))) < 5;
     Constants.sendNumberToElastic("Facing Hub Calculation",
         robotPose.getRotation().getDegrees() - Math.toDegrees(hubAngle) - 90, 3);
     SmartDashboard.putBoolean("Facing Hub?", facingHub);
 
-    hubDistance = blueAlliance
-        ? Math.hypot(Hub.topCenterPoint.getX() - robotPose.getX(), Hub.topCenterPoint.getY() - robotPose.getY())
-        : Math.hypot(robotPose.getX() - Hub.oppTopCenterPoint.getX(), robotPose.getY() - Hub.oppTopCenterPoint.getY());
+    hubDistance = isBlueAlliance()
+        ? Math.hypot(hubCenterPoint.getX() - robotPose.getX(), hubCenterPoint.getY() - robotPose.getY())
+        : Math.hypot(robotPose.getX() - hubCenterPoint.getX(), robotPose.getY() - hubCenterPoint.getY());
     Constants.sendNumberToElastic("Hub Distance", hubDistance, 2);
-    Constants.sendNumberToElastic("Hub Center X", Hub.oppTopCenterPoint.getX(), 2);
-    Constants.sendNumberToElastic("Hub Center Y", Hub.oppTopCenterPoint.getY(), 2);
+    Constants.sendNumberToElastic("Hub Center X", hubCenterPoint.getX(), 2);
+    Constants.sendNumberToElastic("Hub Center Y", hubCenterPoint.getY(), 2);
 
     double fuelVelocity = Math.sqrt(
-        (9.8 * Math.pow(hubDistance, 2)) / (2 * Math.pow(Math.cos(Units.degreesToRadians(ShooterConfig.HOOD_ANGLE)), 2)
-            * (ShooterConfig.INITIAL_HEIGHT + Math.tan(Units.degreesToRadians(ShooterConfig.HOOD_ANGLE)) * hubDistance
+        (9.8 * Math.pow(hubDistance + 0.5, 2)) / (2 * Math.pow(Math.cos(Units.degreesToRadians(ShooterConfig.HOOD_ANGLE)), 2)
+            * (ShooterConfig.INITIAL_HEIGHT + Math.tan(Units.degreesToRadians(ShooterConfig.HOOD_ANGLE)) * (hubDistance + 0.5)
                 - (hubCenterPoint.getZ() - ShooterConfig.INITIAL_HEIGHT))));
     double flywheelRPS = 100 * (fuelVelocity / 9);
     Constants.sendNumberToElastic("Fuel Velocity Calculation", fuelVelocity, 3);
@@ -522,6 +510,12 @@ public class Drivetrain extends SubsystemBase {
     }).finallyDo(() -> swerve.drive(new Translation2d(0, 0), 0, false, false));
   }
 
+  public Command driveRight() {
+    return run(() -> {
+      swerve.drive(new Translation2d(0, -2), 0, false, false);
+    }).finallyDo(() -> swerve.drive(new Translation2d(0, 0), 0, false, false));
+  }
+
   /**
    * Replaces the swerve module feedforward with a new SimpleMotorFeedforward
    * object.
@@ -676,7 +670,7 @@ public class Drivetrain extends SubsystemBase {
    * to 180 degrees.
    */
   public Command resetOdometryAlliance() {
-    if (blueAlliance) {
+    if (isBlueAlliance()) {
       return new InstantCommand(() -> resetOdometry(new Pose2d()));
     } else {
       return new InstantCommand(() -> resetOdometry(new Pose2d(0, 0, Rotation2d.fromDegrees(180))));
@@ -874,5 +868,9 @@ public class Drivetrain extends SubsystemBase {
    */
   public SwerveDrive getSwerve() {
     return swerve;
+  }
+
+  public boolean isBlueAlliance() {
+    return DriverStation.getAlliance().get() == Alliance.Blue;
   }
 }

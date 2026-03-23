@@ -31,8 +31,8 @@ public class Indexer extends SubsystemBase {
     }
 
     public void setToSpeed() {
-            motorA.set(targetSpeed);
-            motorB.set(targetSpeed);
+        motorA.set(targetSpeed);
+        motorB.set(targetSpeed);
     }
 
     public void setTargetSpeed(double speed) {

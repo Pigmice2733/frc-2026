@@ -9,13 +9,13 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.CanConfig;
 import frc.robot.Constants.ShooterConfig;
-import frc.robot.util.DashboardNumber;
 import frc.robot.util.PIDConfig;
 
 public class Shooter extends SubsystemBase {
@@ -28,7 +28,6 @@ public class Shooter extends SubsystemBase {
 
     private PIDConfig pidConfig;
 
-    private DashboardNumber shootingSpeed;
     private double hubSpeed = ShooterConfig.SHOOTING_SPEED;
     private double setpoint = 0;
 
@@ -47,24 +46,20 @@ public class Shooter extends SubsystemBase {
 
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        config.CurrentLimits.SupplyCurrentLimit = 60;
+        config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
         pidConfig.configTalonFX(motor, config);
-
-        shootingSpeed = new DashboardNumber("Hub Target RPS", ShooterConfig.SHOOTING_SPEED, 2);
-
-        stopMotor();
     }
 
     @Override
     public void periodic() {
         updateEntries();
-        if (setpoint == 0) {
-            stopMotor();
-        }
+        if (DriverStation.isDisabled() || setpoint == 0) stopMotor();
         if (setpoint != 0 && hubRelative) {
-            setTargetSpeed(setpoint);
+            setTargetSpeed(hubSpeed);
         } else if (setpoint != 0) {
-            setTargetSpeed(shootingSpeed.getAsDouble());
+            setTargetSpeed(setpoint);
         }
     }
 
@@ -81,8 +76,7 @@ public class Shooter extends SubsystemBase {
             configPID(pidConfig.getValues());
         }
 
-        shootingSpeed.updateValue();
-        hubSpeed = SmartDashboard.getNumber("Flywheel RPS Calculation", shootingSpeed.getAsDouble());
+        hubSpeed = SmartDashboard.getNumber("Flywheel RPS Calculation", ShooterConfig.SHOOTING_SPEED);
         Constants.sendNumberToElastic("Hub Speed", hubSpeed, 2);
 
         SmartDashboard.putBoolean("Hub Relative", hubRelative);
@@ -118,12 +112,20 @@ public class Shooter extends SubsystemBase {
         setpoint = 0;
     }
 
+    public void toggleOnConstant(double rps) {
+        setpoint = rps;
+    }
+
     public Command toggleOnCommand() {
         return runOnce(() -> toggleOn());
     }
 
     public Command toggleOffCommand() {
         return runOnce(() -> toggleOff());
+    }
+
+    public Command toggleOnConstantCommand(double rps) {
+        return runOnce(() -> toggleOnConstant(rps));
     }
 
     public void configPID(double kP, double kI, double kD, double kS, double kV) {
