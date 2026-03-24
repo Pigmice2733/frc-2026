@@ -5,10 +5,11 @@
 package frc.robot;
 
 import frc.robot.Constants.IndexerConfig;
+import frc.robot.commands.AutoCommands;
 import frc.robot.commands.DriveJoysticks;
-import frc.robot.commands.IntakeAuto;
-import frc.robot.commands.Shoot;
-import frc.robot.commands.Autos;
+import frc.robot.commands.IndexerCommands;
+import frc.robot.commands.IntakeCommands;
+import frc.robot.commands.ShooterCommands;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
@@ -21,7 +22,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
@@ -97,8 +97,13 @@ public class RobotContainer {
     }
 
     private void buildAutoChooser() {
-        NamedCommands.registerCommand("Shoot", new Shoot(indexer, shooter));
-        NamedCommands.registerCommand("Intake", new IntakeAuto(intake));
+        NamedCommands.registerCommand("Shoot Then Index", ShooterCommands.shootWaitIndex(indexer, shooter));
+        NamedCommands.registerCommand("Spin Up Shooter", ShooterCommands.spinUpShooter(shooter));
+        NamedCommands.registerCommand("Run Indexer", IndexerCommands.runIndexer(indexer));
+        NamedCommands.registerCommand("Stop Indexer", IndexerCommands.stopIndexer(indexer));
+        NamedCommands.registerCommand("Intake w/ Jostle", IntakeCommands.intakeThenJostle(intake));
+        NamedCommands.registerCommand("Shoot", AutoCommands.shoot(intake, indexer, shooter));
+        NamedCommands.registerCommand("Shoot After Moving", AutoCommands.shootAfterMove(intake, indexer, shooter));
         autoChooser = AutoBuilder.buildAutoChooser("None");
         // autoChooser.addOption("None", Commands.none());
         // autoChooser.addOption("Score Trench - Blue", Autos.scoreTrenchBlue(shooter, indexer));

@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LeftTrenchDrive"
+            "pathName": "LTShoot"
           }
         },
         {
@@ -15,17 +15,11 @@
           "data": {
             "name": "Shoot"
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Intake"
-          }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "LeftTrench",
   "choreoAuto": false
 }

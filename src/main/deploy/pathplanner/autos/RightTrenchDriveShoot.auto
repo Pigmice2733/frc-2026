@@ -13,19 +13,13 @@
         {
           "type": "named",
           "data": {
-            "name": "Shoot"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Intake"
+            "name": "Shoot After Move"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "RightTrench",
   "choreoAuto": false
 }

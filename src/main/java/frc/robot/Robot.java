@@ -34,8 +34,10 @@ public class Robot extends TimedRobot {
     // and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
-    WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
-    CameraServer.startAutomaticCapture("Intake Camera", 0).setVideoMode(PixelFormat.kMJPEG, 360, 240, 30);
+    if (Robot.isReal()) {
+      WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
+      CameraServer.startAutomaticCapture("Intake Camera", 0).setVideoMode(PixelFormat.kMJPEG, 360, 240, 30);
+    }
   }
 
   /**

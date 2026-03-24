@@ -1,0 +1,44 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "LTDriveShoot"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Spin Up Shooter"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot After Move"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LTShootToIntake"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "LeftTrench",
+  "choreoAuto": false
+}

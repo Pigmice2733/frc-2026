@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "CenterBackUp"
+            "pathName": "LTDriveShoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot After Move"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "LeftTrench",
   "choreoAuto": false
 }
