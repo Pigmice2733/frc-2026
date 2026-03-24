@@ -12,8 +12,8 @@ public class Shoot extends SequentialCommandGroup{
     public Shoot(Indexer indx, Shooter shtr) {
         addCommands(Commands.waitSeconds(1),
                 shtr.toggleOnCommand(), 
-                Commands.waitSeconds(1), 
+                Commands.waitUntil(() -> shtr.atSetpoint()), 
+                Commands.waitSeconds(0.5),
                 new InstantCommand(() -> indx.setTargetSpeed(IndexerConfig.INDEXER_SPEED)));
     }
-
 }

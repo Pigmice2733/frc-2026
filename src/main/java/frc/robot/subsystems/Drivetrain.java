@@ -124,13 +124,13 @@ public class Drivetrain extends SubsystemBase {
   public Drivetrain() {
     SmartDashboard.putData(field); // Put a field widget into smart dashboard
     blueAlliance = DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue;
-    // Pose2d startingPose = blueAlliance ? new Pose2d(new Translation2d(Meter.of(1),
-    //     Meter.of(4)),
-    //     Rotation2d.fromDegrees(0))
-    //     : new Pose2d(new Translation2d(Meter.of(16),
-    //         Meter.of(4)),
-    //         Rotation2d.fromDegrees(180));
-    Pose2d startingPose = new Pose2d(Hub.oppTopCenterPoint.getX() + Units.inchesToMeters(43.75), FieldConstants.fieldWidth / 2, Rotation2d.fromDegrees(90));
+    Pose2d startingPose = blueAlliance ? new Pose2d(new Translation2d(Meter.of(1),
+        Meter.of(4)),
+        Rotation2d.fromDegrees(0))
+        : new Pose2d(new Translation2d(Meter.of(16),
+            Meter.of(4)),
+            Rotation2d.fromDegrees(180));
+    // Pose2d startingPose = new Pose2d(Hub.oppTopCenterPoint.getX() + Units.inchesToMeters(43.75), FieldConstants.fieldWidth / 2, Rotation2d.fromDegrees(90));
     System.out.println(startingPose.getX());
     hubTargetAnglePose = new Pose2d();
     hubTargetPose = new Pose2d();

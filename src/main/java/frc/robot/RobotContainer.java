@@ -6,6 +6,7 @@ package frc.robot;
 
 import frc.robot.Constants.IndexerConfig;
 import frc.robot.commands.DriveJoysticks;
+import frc.robot.commands.IntakeAuto;
 import frc.robot.commands.Shoot;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.Drivetrain;
@@ -97,6 +98,7 @@ public class RobotContainer {
 
     private void buildAutoChooser() {
         NamedCommands.registerCommand("Shoot", new Shoot(indexer, shooter));
+        NamedCommands.registerCommand("Intake", new IntakeAuto(intake));
         autoChooser = AutoBuilder.buildAutoChooser("None");
         // autoChooser.addOption("None", Commands.none());
         // autoChooser.addOption("Score Trench - Blue", Autos.scoreTrenchBlue(shooter, indexer));
@@ -113,12 +115,14 @@ public class RobotContainer {
     }
 
     public void autoInit() {
+        // indexer.setAutonomous(true);
         shooter.toggleOff();
         indexer.stop();
         intake.stop();
     }
 
     public void teleopInit() {
+        indexer.setAutonomous(false);
         shooter.toggleOff();
         indexer.stop();
         intake.stop();

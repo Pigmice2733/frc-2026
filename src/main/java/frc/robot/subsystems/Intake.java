@@ -76,4 +76,8 @@ public class Intake extends SubsystemBase {
             .andThen(Commands.waitSeconds(0.125))
             .finallyDo(() -> intake());
     }
+
+    public Command toggleCommand() {
+        return runOnce(() -> toggle());
+    }
 }

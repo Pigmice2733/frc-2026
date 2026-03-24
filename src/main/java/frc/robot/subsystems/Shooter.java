@@ -23,7 +23,6 @@ public class Shooter extends SubsystemBase {
     private TalonFX motor;
     private TalonFXConfiguration config;
 
-    private double targetSpeed;
     private VelocityVoltage velocityVoltageRequest;
 
     private PIDConfig pidConfig;
@@ -98,7 +97,7 @@ public class Shooter extends SubsystemBase {
      * Set the shooter to neutral mode
      */
     public void stopMotor() {
-        targetSpeed = 0;
+        setpoint = 0;
         motor.setControl(new NeutralOut());
     }
 
@@ -144,7 +143,8 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean atSetpoint() {
+        if (setpoint == 0) return false;
         return MathUtil.isNear(
-                targetSpeed, motor.getVelocity().getValueAsDouble(), ShooterConfig.ERROR_TOLERANCE);
+                setpoint, motor.getVelocity().getValueAsDouble(), ShooterConfig.ERROR_TOLERANCE);
     }
 }

@@ -5,6 +5,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import frc.robot.Constants;
 import frc.robot.Constants.CanConfig;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -12,6 +13,8 @@ public class Indexer extends SubsystemBase {
     private SparkMax motorA;
     private SparkMax motorB;
     private double targetSpeed;
+
+    private boolean autoMode;
 
     public Indexer() {
         motorA = new SparkMax(CanConfig.INDEXER_ID_A, MotorType.kBrushless);
@@ -31,8 +34,12 @@ public class Indexer extends SubsystemBase {
     }
 
     public void setToSpeed() {
-        motorA.set(targetSpeed);
-        motorB.set(targetSpeed);
+        double speed = targetSpeed;
+        if (autoMode && !SmartDashboard.getBoolean("Shooter At Setpoint?", false)) {
+            speed = 0;
+        }
+        motorA.set(speed);
+        motorB.set(speed);
     }
 
     public void setTargetSpeed(double speed) {
@@ -49,5 +56,9 @@ public class Indexer extends SubsystemBase {
 
     public Command stopCommand() {
         return runOnce(() -> stop());
+    }
+
+    public void setAutonomous(boolean autoMode) {
+        this.autoMode = autoMode;
     }
 }
