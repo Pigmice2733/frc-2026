@@ -6,12 +6,17 @@ package frc.robot;
 
 import frc.robot.Constants.IndexerConfig;
 import frc.robot.commands.DriveJoysticks;
+import frc.robot.commands.Shoot;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Vision;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -33,7 +38,7 @@ public class RobotContainer {
 
     private boolean robotOriented;
 
-    private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();
+    private SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
         driver = new CommandXboxController(0);
@@ -91,10 +96,12 @@ public class RobotContainer {
     }
 
     private void buildAutoChooser() {
-        autoChooser.addOption("None", Commands.none());
-        autoChooser.addOption("Score Trench - Blue", Autos.scoreTrenchBlue(shooter, indexer));
-        autoChooser.addOption("Score Center - Blue", Autos.scoreCenterBlue(drivetrain, shooter, indexer));
-        autoChooser.addOption("Score Center - Red", Autos.scoreCenterRed(drivetrain, shooter, indexer));
+        NamedCommands.registerCommand("Shoot", new Shoot(indexer, shooter));
+        autoChooser = AutoBuilder.buildAutoChooser("None");
+        // autoChooser.addOption("None", Commands.none());
+        // autoChooser.addOption("Score Trench - Blue", Autos.scoreTrenchBlue(shooter, indexer));
+        // autoChooser.addOption("Score Center - Blue", Autos.scoreCenterBlue(drivetrain, shooter, indexer));
+        // autoChooser.addOption("Score Center - Red", Autos.scoreCenterRed(drivetrain, shooter, indexer));
         // autoChooser.addOption("Rotate, Score", Autos.rotateScore(drivetrain, shooter, indexer));
         // autoChooser.addOption("Position, Rotate, Score", Autos.positionRotateScore(drivetrain, shooter, indexer));
 
@@ -106,6 +113,14 @@ public class RobotContainer {
     }
 
     public void autoInit() {
+        shooter.toggleOff();
+        indexer.stop();
+        intake.stop();
+    }
 
+    public void teleopInit() {
+        shooter.toggleOff();
+        indexer.stop();
+        intake.stop();
     }
 }

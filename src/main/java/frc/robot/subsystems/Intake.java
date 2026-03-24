@@ -45,6 +45,7 @@ public class Intake extends SubsystemBase {
 
     public void stop() {
         targetSpeed = 0;
+        on = false;
         motor.stopMotor();
     }
 

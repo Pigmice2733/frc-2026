@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -160,7 +161,7 @@ public class Drivetrain extends SubsystemBase {
     // swerveDrive.pushOffsetsToEncoders(); // Set the absolute encoder to be used
     // over the internal encoder and push the offsets onto it. Throws warning if not
     // possible
-    // setupPathPlanner();
+    setupPathPlanner();
   }
 
   /**
@@ -330,7 +331,7 @@ public class Drivetrain extends SubsystemBase {
 
     // Preload PathPlanner Path finding
     // IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
-    PathfindingCommand.warmupCommand().schedule();
+    CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
   }
 
   /**
