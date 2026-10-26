@@ -90,10 +90,10 @@ public class RobotContainer {
         operator.rightTrigger().whileTrue(indexer.setCommand(-IndexerConfig.INDEXER_SPEED)); // backward
         operator.rightTrigger().whileFalse(indexer.stopCommand());
 
-        operator.y().whileTrue(new InstantCommand(() -> intake.toggle()));
+        operator.y().onTrue(new InstantCommand(() -> intake.toggle()));
         operator.b().onTrue(new InstantCommand(() -> intake.intake()));
         operator.a().onTrue(new InstantCommand(() -> intake.outtake()));
-        operator.x().onTrue(intake.jostle());
+        operator.x().onTrue(new InstantCommand(() -> intake.jostle()));
     }
 
     private void buildAutoChooser() {
@@ -103,14 +103,8 @@ public class RobotContainer {
         NamedCommands.registerCommand("Stop Indexer", IndexerCommands.stopIndexer(indexer));
         NamedCommands.registerCommand("Intake w/ Jostle", IntakeCommands.intakeThenJostle(intake));
         NamedCommands.registerCommand("Shoot", AutoCommands.shoot(intake, indexer, shooter));
-        NamedCommands.registerCommand("Shoot After Moving", AutoCommands.shootAfterMove(intake, indexer, shooter));
+        NamedCommands.registerCommand("Shoot After Move", AutoCommands.shootAfterMove(intake, indexer, shooter));
         autoChooser = AutoBuilder.buildAutoChooser("None");
-        // autoChooser.addOption("None", Commands.none());
-        // autoChooser.addOption("Score Trench - Blue", Autos.scoreTrenchBlue(shooter, indexer));
-        // autoChooser.addOption("Score Center - Blue", Autos.scoreCenterBlue(drivetrain, shooter, indexer));
-        // autoChooser.addOption("Score Center - Red", Autos.scoreCenterRed(drivetrain, shooter, indexer));
-        // autoChooser.addOption("Rotate, Score", Autos.rotateScore(drivetrain, shooter, indexer));
-        // autoChooser.addOption("Position, Rotate, Score", Autos.positionRotateScore(drivetrain, shooter, indexer));
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
@@ -120,7 +114,7 @@ public class RobotContainer {
     }
 
     public void autoInit() {
-        // indexer.setAutonomous(true);
+        indexer.setAutonomous(true);
         shooter.toggleOff();
         indexer.stop();
         intake.stop();

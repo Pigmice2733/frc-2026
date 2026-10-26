@@ -12,7 +12,7 @@
         "y": 0.7655813953488372
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "RTStart"
     },
     {
       "anchor": {
@@ -25,7 +25,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "RTShoot"
     }
   ],
   "rotationTargets": [],
@@ -35,8 +35,8 @@
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 960.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
@@ -45,7 +45,7 @@
     "rotation": -37.8
   },
   "reversed": false,
-  "folder": "RightTrench",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0.0,
     "rotation": 0.0

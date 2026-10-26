@@ -6,10 +6,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.DrivetrainConfig;
+import frc.robot.util.AllianceUtil;
 
 @SuppressWarnings("unused")
 public class Controls {
+
     private CommandXboxController driver, operator;
+
+    private int inverted = 1;
 
     /** If a value from a joystick is less than this, it will return 0. */
     private double threshold = Constants.AXIS_THRESHOLD;
@@ -27,7 +31,7 @@ public class Controls {
     public double getDriveSpeedX() {
         double joystickY = MathUtil.applyDeadband(driver.getLeftY(), threshold);
 
-        return -joystickY * DrivetrainConfig.MAX_DRIVE_SPEED;
+        return inverted * joystickY * DrivetrainConfig.MAX_DRIVE_SPEED;
     }
 
     /**
@@ -38,7 +42,7 @@ public class Controls {
     public double getDriveSpeedY() {
         double joystickX = MathUtil.applyDeadband(driver.getLeftX(), threshold);
 
-        return -joystickX * DrivetrainConfig.MAX_DRIVE_SPEED;
+        return inverted * joystickX * DrivetrainConfig.MAX_DRIVE_SPEED;
     }
 
     /**
@@ -58,5 +62,13 @@ public class Controls {
      */
     public boolean getRobotOrientedMode() {
         return driver.rightBumper().getAsBoolean();
+    }
+
+    void update(){
+        if (AllianceUtil.isBlueAlliance()) {
+            inverted = -1;
+        } else {
+            inverted = 1;
+        }
     }
 }

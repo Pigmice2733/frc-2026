@@ -23,7 +23,6 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -43,11 +42,9 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
-import frc.robot.FieldConstants;
 import frc.robot.Constants.DrivetrainConfig;
 import frc.robot.Constants.ShooterConfig;
 import frc.robot.FieldConstants.Hub;
-import frc.robot.commands.DriveToPose;
 import frc.robot.LimelightHelpers;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
@@ -84,11 +81,6 @@ public class Drivetrain extends SubsystemBase {
   private Pose2d robotPose;
 
   /**
-   * PID values for the drivetrain.
-   */
-  private PIDConstants pidConstants;
-
-  /**
    * Whether the current alliance station is blue or not.
    */
   private boolean blueAlliance;
@@ -99,20 +91,9 @@ public class Drivetrain extends SubsystemBase {
   private double hubAngle;
 
   /**
-   * The horizontal distance the robot must move such that it is the correct
-   * distance away from the hub
-   */
-  private double hubTranslation;
-
-  /**
    * A pose incorporating the hub angle
    */
   private Pose2d hubTargetAnglePose;
-
-  /**
-   * A pose incorporating the hub angle and hub translation
-   */
-  private Pose2d hubTargetPose;
 
   private double hubDistance;
 
@@ -133,7 +114,6 @@ public class Drivetrain extends SubsystemBase {
     // Pose2d startingPose = new Pose2d(Hub.oppTopCenterPoint.getX() + Units.inchesToMeters(43.75), FieldConstants.fieldWidth / 2, Rotation2d.fromDegrees(90));
     System.out.println(startingPose.getX());
     hubTargetAnglePose = new Pose2d();
-    hubTargetPose = new Pose2d();
     robotPose = new Pose2d();
     // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary
     // objects being created.
@@ -183,8 +163,6 @@ public class Drivetrain extends SubsystemBase {
     updateOdometry();
     robotPose = getPose();
     hubTargetAnglePose = new Pose2d(robotPose.getX(), robotPose.getY(), new Rotation2d(Degrees.of(270 + hubAngle)));
-    hubTargetPose = new Pose2d(robotPose.getX() + (hubTranslation * (isBlueAlliance() ? -1 : 1)), robotPose.getY(),
-        hubTargetAnglePose.getRotation());
     updateEntries();
   }
 
@@ -229,17 +207,11 @@ public class Drivetrain extends SubsystemBase {
       (robotPose.getY() - hubCenterPoint.getY())
       / (robotPose.getX() - hubCenterPoint.getX()));
 
-    hubTranslation = Math.pow(Units.feetToMeters(13), 2)
-      - Math.pow(hubCenterPoint.getY() - robotPose.getY(), 2);
-
     Constants.sendNumberToElastic("Hub Angle", Math.toDegrees(hubAngle), 3);
     Constants.sendNumberToElastic("Hub Target Pose", hubTargetAnglePose.getRotation().getDegrees(), 3);
 
     field.setRobotPose(robotPose);
     SmartDashboard.putData("Field", field);
-
-    pidConstants = new PIDConstants(SmartDashboard.getNumber("Drivetrain P", 0),
-        SmartDashboard.getNumber("Drivetrain I", 0), SmartDashboard.getNumber("Drivetrain D", 0));
 
     facingHub = Math.abs(robotPose.getRotation().getDegrees() - Math.toDegrees(hubAngle) + (90 * (isBlueAlliance() ? 1 : -1))) < 5;
     Constants.sendNumberToElastic("Facing Hub Calculation",
@@ -253,9 +225,9 @@ public class Drivetrain extends SubsystemBase {
     Constants.sendNumberToElastic("Hub Center X", hubCenterPoint.getX(), 2);
     Constants.sendNumberToElastic("Hub Center Y", hubCenterPoint.getY(), 2);
 
-    double fuelVelocity = Math.sqrt(
-        (9.8 * Math.pow(hubDistance + 0.5, 2)) / (2 * Math.pow(Math.cos(Units.degreesToRadians(ShooterConfig.HOOD_ANGLE)), 2)
-            * (ShooterConfig.INITIAL_HEIGHT + Math.tan(Units.degreesToRadians(ShooterConfig.HOOD_ANGLE)) * (hubDistance + 0.5)
+    double fuelVelocity = Math.sqrt(+
+        (9.8 * Math.pow(hubDistance, 2)) / (2 * Math.pow(Math.cos(Units.degreesToRadians(ShooterConfig.HOOD_ANGLE)), 2)
+            * (ShooterConfig.INITIAL_HEIGHT + Math.tan(Units.degreesToRadians(ShooterConfig.HOOD_ANGLE)) * (hubDistance)
                 - (hubCenterPoint.getZ() - ShooterConfig.INITIAL_HEIGHT))));
     double flywheelRPS = 100 * (fuelVelocity / 9);
     Constants.sendNumberToElastic("Fuel Velocity Calculation", fuelVelocity, 3);
@@ -394,19 +366,7 @@ public class Drivetrain extends SubsystemBase {
    * Rotates the robot such that the shooter is facing the hub
    */
   public Command rotateToHub() {
-    System.out.println("Pose: " + hubTargetAnglePose.getX() + ", " + hubTargetAnglePose.getY() + ", "
-        + hubTargetAnglePose.getRotation().getDegrees());
     return driveToPose(hubTargetAnglePose);
-  }
-
-  /**
-   * Positions the robot such that the shooter is facing the hub at the correct
-   * distance away given the setpoint of the shooter
-   */
-  public Command positionXToHub() {
-    System.out.println("Pose: " + hubTargetPose.getX() + ", " + hubTargetPose.getY() + ", "
-        + hubTargetPose.getRotation().getDegrees());
-    return new DriveToPose(this, new Transform2d(new Translation2d(hubTranslation, 0), new Rotation2d()));
   }
 
   /**

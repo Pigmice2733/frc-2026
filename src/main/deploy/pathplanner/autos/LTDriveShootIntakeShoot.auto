@@ -30,6 +30,12 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 5.0
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "Stop Indexer"
@@ -39,6 +45,12 @@
           "type": "path",
           "data": {
             "pathName": "LTShootToIntake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.0
           }
         },
         {
@@ -57,6 +69,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "LeftTrench",
+  "folder": null,
   "choreoAuto": false
 }

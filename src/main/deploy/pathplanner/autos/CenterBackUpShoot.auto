@@ -20,6 +20,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "Center",
+  "folder": null,
   "choreoAuto": false
 }

@@ -12,20 +12,20 @@
         "y": 4.026887298747764
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "CenterStart"
     },
     {
       "anchor": {
-        "x": 1.87,
-        "y": 4.026887298747764
+        "x": 1.8006704707560623,
+        "y": 4.571954350927247
       },
       "prevControl": {
-        "x": 2.2107334525939177,
-        "y": 4.026887298747764
+        "x": 2.14140392334998,
+        "y": 4.571954350927247
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "CenterShoot"
     }
   ],
   "rotationTargets": [],
@@ -35,17 +35,17 @@
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 960.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": -108.43494882292201
   },
   "reversed": false,
-  "folder": "Center",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": -90.0

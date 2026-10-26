@@ -10,10 +10,7 @@ import frc.robot.subsystems.Shooter;
 public class AutoCommands {
     
     public static Command shoot(Intake intk, Indexer indx, Shooter shtr) {
-        return new SequentialCommandGroup(ShooterCommands.spinUpShooter(shtr), 
-                Commands.waitUntil(() -> shtr.atSetpoint()), 
-                Commands.waitSeconds(0.25),
-                IndexerCommands.runIndexer(indx), 
+        return new SequentialCommandGroup(ShooterCommands.shootWaitIndex(indx, shtr), 
                 IntakeCommands.intakeThenJostle(intk));
     }
 
